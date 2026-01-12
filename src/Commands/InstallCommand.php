@@ -288,47 +288,81 @@ class InstallCommand extends XditnModuleCommand
     protected function publishConfig(): void
     {
         try {
-            // mac os
-            if (Str::of(PHP_OS)->lower()->contains('dar')) {
-                exec(Application::formatCommandString('key:generate'));
-                exec(Application::formatCommandString('jwt:secret'));
-                exec(Application::formatCommandString('vendor:publish --tag=xditn-config'));
-                if ($this->isShouldPublishSanctum()) {
-                    exec(Application::formatCommandString('vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"'));
-                }
+            // 生成 APP_KEY
+            $this->runArtisanCommand('key:generate');
 
-                exec(Application::formatCommandString('migrate'));
-            } else {
-                Process::run(Application::formatCommandString('key:generate'))->throw();
-                Process::run(Application::formatCommandString('jwt:secret'))->throw();
-                Process::run(Application::formatCommandString('vendor:publish --tag=xditn-config'))->throw();
-                if ($this->isShouldPublishSanctum()) {
-                    Process::run(Application::formatCommandString('vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"'))->throw();
-                }
-                Process::run(Application::formatCommandString('migrate'))->throw();
+            // JWT secret（可选，仅当安装了 jwt-auth 包时）
+            if ($this->isJwtAuthInstalled()) {
+                $this->runArtisanCommand('jwt:secret');
             }
+
+            // 发布配置
+            $this->runArtisanCommand('vendor:publish --tag=xditn-config');
+
+            // 发布 Sanctum 配置
+            if ($this->isShouldPublishSanctum()) {
+                $this->runArtisanCommand('vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"');
+            }
+
+            // 执行迁移
+            $this->runArtisanCommand('migrate');
 
             // 获取要安装的模块列表
             $modulesToInstall = $this->getModulesToInstall();
 
+            $this->info('准备安装模块: '.implode(', ', $modulesToInstall));
+
             // 安装默认模块（user, develop）
             foreach (['user', 'develop'] as $name) {
+                $this->info("迁移模块 [{$name}]...");
                 $this->migrateModule($name);
             }
 
             // 安装指定模块和默认模块
             foreach ($modulesToInstall as $name) {
+                $this->info("安装模块 [{$name}]...");
                 try {
-                    XditnModule::getModuleInstaller($name)->install();
-                    $this->info("模块 [{$name}] 安装成功");
+                    $installer = XditnModule::getModuleInstaller($name);
+                    $installer->install();
+                    $this->info("✓ 模块 [{$name}] 安装成功");
+                } catch (\RuntimeException $e) {
+                    // Installer 未找到，尝试迁移
+                    $this->warn("模块 [{$name}] 没有 Installer，尝试迁移...");
+                    try {
+                        $this->migrateModule($name);
+                        $this->info("✓ 模块 [{$name}] 迁移成功");
+                    } catch (\Throwable $e2) {
+                        $this->warn("✗ 模块 [{$name}] 迁移失败: {$e2->getMessage()}");
+                    }
                 } catch (\Throwable $e) {
-                    $this->warn("模块 [{$name}] 安装失败: {$e->getMessage()}");
+                    $this->warn("✗ 模块 [{$name}] 安装失败: {$e->getMessage()}");
                 }
             }
 
         } catch (\Exception|\Throwable $e) {
-            $this->warn($e->getMessage());
+            $this->error('安装失败: '.$e->getMessage());
+            throw $e;
         }
+    }
+
+    /**
+     * 执行 Artisan 命令.
+     */
+    protected function runArtisanCommand(string $command): void
+    {
+        if (Str::of(PHP_OS)->lower()->contains('dar')) {
+            exec(Application::formatCommandString($command));
+        } else {
+            Process::run(Application::formatCommandString($command))->throw();
+        }
+    }
+
+    /**
+     * 检查是否安装了 jwt-auth 包.
+     */
+    protected function isJwtAuthInstalled(): bool
+    {
+        return class_exists(\Tymon\JWTAuth\JWTAuth::class);
     }
 
     protected function migrateModule(string $name): void
