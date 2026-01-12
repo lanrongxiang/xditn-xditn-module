@@ -7,7 +7,7 @@ namespace Modules\System\Models;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 
 /**
  * @property $id

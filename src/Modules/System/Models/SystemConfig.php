@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\System\Models;
 
 use Modules\System\Support\Configure;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 use XditnModule\Traits\DB\Cacheable;
 
 /**

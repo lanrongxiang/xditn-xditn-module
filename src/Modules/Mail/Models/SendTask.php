@@ -7,7 +7,7 @@ namespace Modules\Mail\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Mail\Enums\SendTaskStatus;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 
 /**
  * @property int $id

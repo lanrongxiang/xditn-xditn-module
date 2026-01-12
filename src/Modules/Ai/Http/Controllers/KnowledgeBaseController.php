@@ -6,7 +6,7 @@ namespace Modules\Ai\Http\Controllers;
 
 use Modules\Ai\Http\Requests\AiKnowledgeBaseRequest as Request;
 use Modules\Ai\Models\KnowledgeBase;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @class AiKnowledgeBaseController

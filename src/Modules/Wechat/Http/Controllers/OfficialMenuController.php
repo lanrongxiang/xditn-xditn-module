@@ -4,9 +4,9 @@ namespace Modules\Wechat\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Modules\Wechat\Support\Official\OfficialMenu;
-use XditnModule\Base\CatchController;
+use XditnModule\Base\XditnModuleController;
 
-class OfficialMenuController extends CatchController
+class OfficialMenuController extends XditnModuleController
 {
     public function __construct(protected OfficialMenu $menu)
     {

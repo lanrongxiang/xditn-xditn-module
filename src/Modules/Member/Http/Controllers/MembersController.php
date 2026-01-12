@@ -6,7 +6,7 @@ namespace Modules\Member\Http\Controllers;
 
 use Modules\Member\Http\Requests\MemberRequest as Request;
 use Modules\Member\Models\Members;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

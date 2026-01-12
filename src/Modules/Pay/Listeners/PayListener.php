@@ -1,40 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Pay\Listeners;
 
 use Modules\Pay\Enums\PayPlatform;
 use Modules\Pay\Enums\PayStatus;
 use Modules\Pay\Events\PayEvent;
+use Modules\Pay\Gateways\AliPay\AliPayParams;
+use Modules\Pay\Gateways\DouYinPay\DouYinPayParams;
+use Modules\Pay\Gateways\UniPay\UniPayParams;
+use Modules\Pay\Gateways\WechatPay\WechatPayParams;
 use Modules\Pay\Models\Order;
-use Modules\Pay\Support\PayParams\AirwallexParams;
-use Modules\Pay\Support\PayParams\AliPayParams;
-use Modules\Pay\Support\PayParams\DouYinPayParams;
-use Modules\Pay\Support\PayParams\PayPalParams;
-use Modules\Pay\Support\PayParams\UniPayParams;
-use Modules\Pay\Support\PayParams\WechatPayParams;
 
+/**
+ * 支付事件监听器.
+ *
+ * 处理支付创建事件
+ */
 class PayListener
 {
     /**
-     * Create the event listener.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Handle the event.
-     *
-     * @param PayEvent $event
-     *
-     * @return array
      */
     public function handle(PayEvent $event): array
     {
-        //
         $params = $event->params;
 
         $order = Order::createNew([
@@ -50,11 +40,9 @@ class PayListener
         if ($order) {
             return match ($params['platform']) {
                 PayPlatform::ALIPAY => (new AliPayParams($params))->{$params['action']}(),
-                PayPlatform::UNIPAY => (new UniPayParams($params))->{$params['action']}(),
                 PayPlatform::WECHAT => (new WechatPayParams($params))->{$params['action']}(),
-                PayPlatform::DOUYIN => (new DouyinPayParams($params))->{$params['action']}(),
-                PayPlatform::PAYPAL => (new PayPalParams($params))->{$params['action']}(),
-                PayPlatform::AIRWALLEX => (new AirwallexParams($params))->{$params['action']}(),
+                PayPlatform::UNIPAY => (new UniPayParams($params))->{$params['action']}(),
+                PayPlatform::DOUYIN => (new DouYinPayParams($params))->{$params['action']}(),
                 default => [],
             };
         }

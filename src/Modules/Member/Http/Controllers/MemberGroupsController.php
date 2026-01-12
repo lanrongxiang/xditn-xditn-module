@@ -6,7 +6,7 @@ namespace Modules\Member\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Modules\Member\Models\MemberGroups;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

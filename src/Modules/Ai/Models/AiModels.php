@@ -6,7 +6,7 @@ namespace Modules\Ai\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 
 /**
  * @property $id

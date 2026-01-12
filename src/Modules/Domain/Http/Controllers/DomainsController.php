@@ -7,7 +7,7 @@ namespace Modules\Domain\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Domain\Models\Domains;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 use XditnModule\Exceptions\FailedException;
 
 class DomainsController extends Controller

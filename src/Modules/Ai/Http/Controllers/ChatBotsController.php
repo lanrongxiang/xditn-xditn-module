@@ -6,7 +6,7 @@ namespace Modules\Ai\Http\Controllers;
 
 use Modules\Ai\Http\Requests\AiChatBotsRequest as Request;
 use Modules\Ai\Models\ChatBots;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @class AiChatBotsController

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\User\Models\Traits\UserRelations;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 use XditnModule\Enums\Status;
 use XditnModule\Facade\Admin;
 

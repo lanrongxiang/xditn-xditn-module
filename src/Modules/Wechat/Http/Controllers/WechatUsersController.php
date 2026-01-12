@@ -7,7 +7,7 @@ namespace Modules\Wechat\Http\Controllers;
 use Illuminate\Http\Request;
 use Modules\Wechat\Models\WechatUsers;
 use Modules\Wechat\Support\Official\Sync\Users;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 class WechatUsersController extends Controller
 {

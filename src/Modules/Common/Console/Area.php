@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Console;
 
 use Illuminate\Console\Command;
@@ -18,7 +20,7 @@ class Area extends Command
      *
      * @var string
      */
-    protected $signature = 'catch:areas';
+    protected $signature = 'xditn:module:areas';
 
     /**
      * The console command description.

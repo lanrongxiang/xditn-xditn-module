@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use XditnModule\Base\CatchModel;
+use XditnModule\Base\XditnModuleModel;
 
 /**
  * @property $id
@@ -38,7 +38,7 @@ use XditnModule\Base\CatchModel;
  * @property $updated_at
  * @property $deleted_at
  */
-class Members extends CatchModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, JWTSubject
+class Members extends XditnModuleModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, JWTSubject
 {
     use Authenticatable;
     use Authorizable;
@@ -139,26 +139,10 @@ class Members extends CatchModel implements AuthenticatableContract, Authorizabl
     }
 
     /**
-     * 获取订阅关系.
-     */
-    public function subscriptions()
-    {
-        return $this->hasMany(\Modules\VideoSubscription\Models\Subscription::class, 'user_id');
-    }
-
-    /**
      * 获取交易记录关系.
      */
     public function transactions()
     {
         return $this->hasMany(\Modules\Pay\Models\Transaction::class, 'user_id');
-    }
-
-    /**
-     * 获取观看记录关系.
-     */
-    public function watchRecords()
-    {
-        return $this->hasMany(\Modules\VideoSubscription\Models\VideoWatchRecord::class, 'user_id');
     }
 }

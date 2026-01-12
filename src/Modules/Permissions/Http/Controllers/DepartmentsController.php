@@ -6,7 +6,7 @@ namespace Modules\Permissions\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Modules\Permissions\Models\Departments;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 use XditnModule\Facade\Admin;
 
 /**

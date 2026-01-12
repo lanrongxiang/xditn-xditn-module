@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Modules\Permissions\Enums\MenuType;
 use Modules\Permissions\Models\Permissions;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 use XditnModule\Exceptions\FailedException;
 use XditnModule\Facade\Admin;
 

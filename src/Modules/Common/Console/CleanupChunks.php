@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Console;
 
 use Illuminate\Console\Command;
@@ -12,7 +14,7 @@ class CleanupChunks extends Command
      *
      * @var string
      */
-    protected $signature = 'catch:cleanup:chunks';
+    protected $signature = 'xditn:module:cleanup:chunks';
 
     /**
      * The console command description.

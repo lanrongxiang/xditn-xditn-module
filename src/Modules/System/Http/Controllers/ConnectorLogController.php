@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Modules\System\Models\ConnectorLog;
 use Modules\System\Models\SystemConfig;
 use Modules\System\Support\Configure;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

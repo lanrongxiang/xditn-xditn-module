@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Mail\Http\Requests\SendTaskRequest;
 use Modules\Mail\Models\MailTemplate;
 use Modules\Mail\Models\SendTask;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @class SendTaskController

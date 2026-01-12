@@ -8,12 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Schema;
-use Modules\VideoSubscription\Models\HomeCategory;
-use Modules\VideoSubscription\Models\Video;
-use Modules\VideoSubscription\Models\VideoCategory;
-use Modules\VideoSubscription\Models\VipPlan;
-use Modules\VideoSubscription\Traits\HasMultilingualFields;
-use XditnModule\Base\CatchModel;
+use XditnModule\Base\XditnModuleModel;
 use XditnModule\Traits\DB\BaseOperate;
 use XditnModule\Traits\DB\DateformatTrait;
 use XditnModule\Traits\DB\ScopeTrait;
@@ -35,13 +30,10 @@ class TableData implements OptionInterface
 {
     /**
      * 表名到模型类的映射.
+     *
+     * 用户可以在项目中扩展此类，添加自定义的表名到模型类的映射
      */
-    protected array $tableModelMap = [
-        'video_categories' => VideoCategory::class,
-        'vip_plans' => VipPlan::class,
-        'videos' => Video::class,
-        'home_categories' => HomeCategory::class,
-    ];
+    protected array $tableModelMap = [];
 
     public function get(): array|Collection
     {
@@ -68,9 +60,10 @@ class TableData implements OptionInterface
 
         if ($modelClass) {
             $modelInstance = new $modelClass();
-            // 检查是否使用了 HasMultilingualFields trait
+            // 检查是否使用了 HasMultilingualFields trait（如果项目中定义了此 trait）
             $traits = class_uses_recursive($modelClass);
-            if (in_array(HasMultilingualFields::class, $traits)) {
+            $hasMultilingualFieldsTrait = 'Modules\\VideoSubscription\\Traits\\HasMultilingualFields';
+            if (in_array($hasMultilingualFieldsTrait, $traits) && method_exists($modelInstance, 'getMultilingualFields')) {
                 $isMultilingual = true;
                 // 检查 label 字段是否为多语言字段
                 $multilingualFields = $modelInstance->getMultilingualFields() ?? [];
@@ -88,7 +81,7 @@ class TableData implements OptionInterface
         if ($modelClass && $isMultilingual) {
             $model = new $modelClass();
         } elseif (in_array('deleted_at', $columns)) {
-            $model = new class() extends CatchModel {};
+            $model = new class() extends XditnModuleModel {};
         } else {
             $model = new class() extends Model {
                 use BaseOperate;

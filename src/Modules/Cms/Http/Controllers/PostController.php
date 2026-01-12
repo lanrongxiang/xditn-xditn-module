@@ -6,17 +6,16 @@ namespace Modules\Cms\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Modules\Cms\Dynamics\Post as PostDynamic;
 use Modules\Cms\Models\Category;
 use Modules\Cms\Models\Post;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端
  *
  * @subgroup 文章管理
  *
- * @subgroupDescription  后台内容管理->文章管理
+ * @subgroupDescription 后台内容管理->文章管理
  */
 class PostController extends Controller
 {
@@ -78,10 +77,8 @@ class PostController extends Controller
      * @bodyParam status int 文章状态:1 草稿 2 发布
      * @bodyParam tags string[] 文章标签
      * @bodyParam type 文章类型 1 文章 2 页面
-     *
-     * @return mixed
      */
-    public function store(Request $request)
+    public function store(Request $request): mixed
     {
         return $this->model->storeBy($request->all());
     }
@@ -89,7 +86,7 @@ class PostController extends Controller
     /**
      * 文章详情.
      *
-     * @urlParam id     *
+     * @urlParam id int required 文章ID
      *
      * @responseField data object 文章详情
      * @responseField data.id int 文章ID
@@ -111,10 +108,8 @@ class PostController extends Controller
      * @responseField data.seo_description string SEO描述
      * @responseField data.type int 文章类型 1 文章 2 页面
      * @responseField data.tags string[] 文章标签
-     *
-     * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function show($id)
+    public function show(mixed $id): mixed
     {
         $post = $this->model->firstBy($id);
 
@@ -126,7 +121,7 @@ class PostController extends Controller
     /**
      * 更新文章.
      *
-     * @urlParam id int     *
+     * @urlParam id int required 文章ID
      *
      * @bodyParam title string 文章标题
      * @bodyParam category_id int 文章分类ID
@@ -145,10 +140,8 @@ class PostController extends Controller
      * @bodyParam status int 文章状态:1 草稿 2 发布
      * @bodyParam tags string[] 文章标签
      * @bodyParam type 文章类型 1 文章 2 页面
-     *
-     * @return true
      */
-    public function update($id, Request $request)
+    public function update(mixed $id, Request $request): bool
     {
         if ($this->model->updateBy($id, $request->all())) {
             $this->model->savePostTags($this->model->firstBy($id));
@@ -160,8 +153,9 @@ class PostController extends Controller
     /**
      * 删除文章.
      *
-     * @urlParam id int     */
-    public function destroy($id): bool
+     * @urlParam id int required 文章ID
+     */
+    public function destroy(mixed $id): bool
     {
         return $this->model->deletesBy($id);
     }
@@ -169,14 +163,10 @@ class PostController extends Controller
     /**
      * 文章发布.
      *
-     * @urlParam id int     */
-    public function enable($id): bool
+     * @urlParam id int required 文章ID
+     */
+    public function enable(mixed $id): bool
     {
         return $this->model->togglesBy($id);
-    }
-
-    public function dynamic(PostDynamic $post): array
-    {
-        return $post();
     }
 }

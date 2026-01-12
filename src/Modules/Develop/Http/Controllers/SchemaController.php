@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Modules\Develop\Models\SchemaFiles;
 use Modules\Develop\Models\Schemas;
 use Modules\Develop\Support\SchemaColumns;
-use XditnModule\Base\CatchController;
+use XditnModule\Base\XditnModuleController;
 
 /**
  * @group 管理端
@@ -15,7 +15,7 @@ use XditnModule\Base\CatchController;
  *
  * @subgroupDescription  数据库表管理
  */
-class SchemaController extends CatchController
+class SchemaController extends XditnModuleController
 {
     public function __construct(
         protected Schemas $schemas

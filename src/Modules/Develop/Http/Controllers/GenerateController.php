@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Develop\Http\Controllers;
 
 use Exception;
 use Illuminate\Http\Request;
 use Modules\Develop\Models\Schemas;
 use Modules\Develop\Support\Generate\Generator;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端
  *
  * @subgroup 代码生成
  *
- * @subgroupDescription  代码生成
+ * @subgroupDescription 代码生成
  */
 class GenerateController extends Controller
 {
@@ -29,7 +31,6 @@ class GenerateController extends Controller
      * @bodyParam codeGen.schema string 表名
      * @bodyParam codeGen.form boolean 是否开启表单
      * @bodyParam codeGen.menu string 菜单名称(填写则生成对应菜单，不填则不生成)
-     * @bodyParam codeGen.generateBackend boolean 是否生成后端文件(model/controller/request/route)，默认false
      * @bodyParam codeGen.generateFiles boolean 是否生成文件到文件系统，默认true。设置为false时只保存内容到数据库，不生成实际文件
      * @bodyParam structures object[] required
      * @bodyParam structures[].field string 字段名称: id
@@ -44,14 +45,9 @@ class GenerateController extends Controller
      *
      * @responseField data boolean 响应结果
      *
-     * @param Request $request
-     * @param Generator $generator
-     *
-     * @return bool
-     *
      * @throws Exception
      */
-    public function index(Request $request, Generator $generator)
+    public function index(Request $request, Generator $generator): bool
     {
         $params = $request->all();
 

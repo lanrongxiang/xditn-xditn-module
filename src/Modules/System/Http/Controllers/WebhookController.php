@@ -7,7 +7,7 @@ namespace Modules\System\Http\Controllers;
 use Illuminate\Http\Request;
 use Modules\System\Models\Webhooks;
 use Modules\System\Support\Webhook;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

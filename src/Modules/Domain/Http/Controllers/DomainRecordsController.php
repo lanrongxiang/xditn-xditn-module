@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Modules\Domain\Models\Domains;
 use Modules\Domain\Support\Request\Request as DomainRequest;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 class DomainRecordsController extends Controller
 {

@@ -6,7 +6,7 @@ namespace Modules\Common\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Modules\Common\Services\TranslationService;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 use XditnModule\Exceptions\FailedException;
 
 /**

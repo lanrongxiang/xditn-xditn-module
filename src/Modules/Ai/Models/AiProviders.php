@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Ai\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 
 /**
  * @property $id

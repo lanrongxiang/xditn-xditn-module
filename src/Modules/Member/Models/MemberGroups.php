@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Member\Models;
 
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 
 /**
  * @property $id

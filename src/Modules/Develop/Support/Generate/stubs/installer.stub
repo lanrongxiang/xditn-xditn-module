@@ -1,15 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\{Module};
 
-use Catch\Support\Module\Installer as ModuleInstaller;
+use XditnModule\Support\Module\Installer as ModuleInstaller;
 use Modules\{Module}\Providers\{provider}ServiceProvider;
 
 class Installer extends ModuleInstaller
 {
+    /**
+     * 模块信息.
+     */
     protected function info(): array
     {
-        // TODO: Implement info() method.
         return [
             'title' => '{title}',
             'name' => '{name}',
@@ -20,13 +24,19 @@ class Installer extends ModuleInstaller
         ];
     }
 
+    /**
+     * 安装时需要的依赖包.
+     */
     protected function requirePackages(): void
     {
-        // TODO: Implement requirePackages() method.
+        // 在此添加 composer require 命令
     }
 
+    /**
+     * 卸载时移除的依赖包.
+     */
     protected function removePackages(): void
     {
-        // TODO: Implement removePackages() method.
+        // 在此添加 composer remove 命令
     }
 }

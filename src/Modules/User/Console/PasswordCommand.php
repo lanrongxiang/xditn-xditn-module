@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // +----------------------------------------------------------------------
 // | XditnModule [Just Like ～ ]
 // +----------------------------------------------------------------------
@@ -17,7 +19,7 @@ use Modules\User\Models\User;
 
 class PasswordCommand extends Command
 {
-    protected $signature = 'catch:pwd';
+    protected $signature = 'xditn:module:pwd';
 
     protected $description = '更新后台用户密码';
 

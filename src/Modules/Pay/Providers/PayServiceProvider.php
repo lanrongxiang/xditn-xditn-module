@@ -14,7 +14,6 @@ use Modules\Pay\Listeners\PaymentCompletedLogListener;
 use Modules\Pay\Listeners\PaymentCreatedLogListener;
 use Modules\Pay\Listeners\PaymentFailedLogListener;
 use Modules\Pay\Listeners\PaymentOrderStatusListener;
-use Modules\Pay\Listeners\PaymentRiskListener;
 use Modules\Pay\Listeners\PaymentStatisticsListener;
 use Modules\Pay\Listeners\PayNotifyListener;
 use Modules\Pay\Listeners\PayNotifyLogListener;
@@ -32,7 +31,6 @@ class PayServiceProvider extends XditnModuleModuleServiceProvider
             PaymentCreatedLogListener::class,
             PaymentOrderStatusListener::class,
             PaymentStatisticsListener::class,
-            PaymentRiskListener::class,
         ],
         PaymentCompleted::class => PaymentCompletedLogListener::class,
         PaymentFailed::class => PaymentFailedLogListener::class,
@@ -41,10 +39,7 @@ class PayServiceProvider extends XditnModuleModuleServiceProvider
     /**
      * 注册命令.
      */
-    protected array $commands = [
-        \Modules\Pay\Console\Commands\CancelTimeoutOrdersCommand::class,
-        \Modules\Pay\Console\Commands\GenerateRevenueSettlementCommand::class,
-    ];
+    protected array $commands = [];
 
     /**
      * route path.

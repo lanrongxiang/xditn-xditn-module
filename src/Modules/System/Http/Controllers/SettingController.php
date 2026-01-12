@@ -7,7 +7,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Modules\System\Models\SystemConfig as Config;
 use Modules\System\Support\Configure;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

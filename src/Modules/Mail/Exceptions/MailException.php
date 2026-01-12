@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Mail\Exceptions;
 
-use XditnModule\Exceptions\CatchException;
+use XditnModule\Exceptions\XditnModuleException;
 
-class MailException extends CatchException
+class MailException extends XditnModuleException
 {
-    //
 }

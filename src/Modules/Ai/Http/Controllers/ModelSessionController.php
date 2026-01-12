@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Ai\Http\Controllers;
 
 use Modules\Ai\Models\ModelSession;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @class AiModelSessionController

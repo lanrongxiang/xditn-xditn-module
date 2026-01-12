@@ -6,7 +6,7 @@ namespace Modules\Mail\Http\Controllers;
 
 use Modules\Mail\Http\Requests\TemplateRequest;
 use Modules\Mail\Models\MailTemplate;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

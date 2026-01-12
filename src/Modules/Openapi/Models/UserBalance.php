@@ -2,7 +2,7 @@
 
 namespace Modules\Openapi\Models;
 
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 
 /**
  * @property $id

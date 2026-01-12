@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Pay\Http\Controllers;
 
 use Modules\Pay\Models\RechargeActivity;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

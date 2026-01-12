@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Modules\Openapi\Http\Requests\UsersRequest;
 use Modules\Openapi\Models\UserBalance;
 use Modules\Openapi\Models\Users;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group OpenAPI接口

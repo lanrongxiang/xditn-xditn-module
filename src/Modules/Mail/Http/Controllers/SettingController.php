@@ -5,9 +5,9 @@ namespace Modules\Mail\Http\Controllers;
 use Illuminate\Http\Request;
 use Modules\System\Models\SystemConfig;
 use Modules\System\Support\Configure;
-use XditnModule\Base\CatchController;
+use XditnModule\Base\XditnModuleController;
 
-class SettingController extends CatchController
+class SettingController extends XditnModuleController
 {
     public function index()
     {

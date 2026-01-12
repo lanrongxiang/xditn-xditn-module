@@ -6,7 +6,7 @@ namespace Modules\System\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Modules\System\Models\SystemSmsTemplate;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

@@ -7,7 +7,7 @@ namespace Modules\Pay\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Modules\Pay\Enums\RefundStatus;
-use XditnModule\Base\CatchModel;
+use XditnModule\Base\XditnModuleModel;
 
 /**
  * @property $id
@@ -24,7 +24,7 @@ use XditnModule\Base\CatchModel;
  * @property $updated_at
  * @property $deleted_at
  */
-class OrderRefund extends CatchModel
+class OrderRefund extends XditnModuleModel
 {
     use HasUuids;
 

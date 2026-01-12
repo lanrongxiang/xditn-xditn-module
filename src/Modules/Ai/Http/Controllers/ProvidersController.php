@@ -7,7 +7,7 @@ namespace Modules\Ai\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Ai\Models\AiProviders;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 use XditnModule\Exceptions\FailedException;
 
 /**

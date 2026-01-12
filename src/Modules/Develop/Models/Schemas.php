@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema as SchemaFacade;
 use Modules\Develop\Support\Generate\Create\Schema;
-use XditnModule\Base\CatchModel;
+use XditnModule\Base\XditnModuleModel;
 use XditnModule\Enums\Status;
 
 /**
@@ -21,7 +21,7 @@ use XditnModule\Enums\Status;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
-class Schemas extends CatchModel
+class Schemas extends XditnModuleModel
 {
     /**
      * @var string

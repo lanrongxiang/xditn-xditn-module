@@ -5,7 +5,7 @@ namespace Modules\System\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 use Modules\Permissions\Models\Roles;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 
 class TableColumn extends Model
 {

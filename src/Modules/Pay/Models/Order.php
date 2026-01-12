@@ -13,7 +13,7 @@ use Modules\Pay\Enums\PayAction;
 use Modules\Pay\Enums\PayPlatform;
 use Modules\Pay\Enums\PayStatus;
 use Modules\Pay\Enums\RefundStatus;
-use XditnModule\Base\CatchModel;
+use XditnModule\Base\XditnModuleModel;
 
 /**
  * @property $id
@@ -32,7 +32,7 @@ use XditnModule\Base\CatchModel;
  * @property $updated_at
  * @property $deleted_at
  */
-class Order extends CatchModel
+class Order extends XditnModuleModel
 {
     use HasUuids;
 

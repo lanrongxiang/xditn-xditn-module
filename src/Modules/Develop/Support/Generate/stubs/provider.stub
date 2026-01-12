@@ -1,20 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\{Module}\Providers;
 
-use Catch\CatchAdmin;
-use Catch\Providers\CatchModuleServiceProvider;
+use XditnModule\Providers\XditnModuleModuleServiceProvider;
 
-class {Module}ServiceProvider extends CatchModuleServiceProvider
+class {Module}ServiceProvider extends XditnModuleModuleServiceProvider
 {
     /**
-     * route path
-     *
-     * @return string
+     * 模块名称.
      */
     public function moduleName(): string
     {
-        // TODO: Implement path() method.
         return '{module}';
     }
 }

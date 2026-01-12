@@ -7,7 +7,7 @@ namespace Modules\Wechat\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Modules\Wechat\Models\WechatNews;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 class WechatNewsController extends Controller
 {

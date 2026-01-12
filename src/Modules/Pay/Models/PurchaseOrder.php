@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Modules\Pay\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Modules\VideoSubscription\Models\VideoEpisode;
-use XditnModule\Base\CatchModel;
+use XditnModule\Base\XditnModuleModel;
 
 /**
  * @property $id
@@ -19,7 +17,7 @@ use XditnModule\Base\CatchModel;
  * @property $updated_at
  * @property $deleted_at
  */
-class PurchaseOrder extends CatchModel
+class PurchaseOrder extends XditnModuleModel
 {
     use HasUuids;
 
@@ -63,21 +61,5 @@ class PurchaseOrder extends CatchModel
     public function order()
     {
         return $this->belongsTo(Order::class, 'id', 'id');
-    }
-
-    /**
-     * 关联视频剧集.
-     */
-    public function episode(): BelongsTo
-    {
-        return $this->belongsTo(VideoEpisode::class, 'episode_id');
-    }
-
-    /**
-     * 关联视频.
-     */
-    public function video()
-    {
-        return $this->belongsTo(\Modules\VideoSubscription\Models\Video::class, 'video_id');
     }
 }

@@ -14,7 +14,7 @@ use Modules\Pay\Http\Requests\OrderRefundRequest;
 use Modules\Pay\Models\Order;
 use Modules\Pay\Models\OrderRefund;
 use Modules\Pay\Support\PayFactory;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端
@@ -35,7 +35,7 @@ class OrderController extends Controller
      *
      * @queryParam user_id int 用户ID
      * @queryParam out_trade_no string 第三方订单号
-     * @queryParam platform int 支付平台:5=PayPal,8=PromptPay
+     * @queryParam platform int 支付平台:1=支付宝,2=微信,3=银联,4=抖音
      * @queryParam pay_status int 支付状态:1=待支付,2=支付成功,3=支付失败,4=超时未支付
      * @queryParam refund_status int 退款状态:1=未退款,2=退款成功,3=退款失败,4=退款中,5=已拒绝
      * @queryParam page int 页码
@@ -50,7 +50,7 @@ class OrderController extends Controller
      * @responseField data[].id string 订单ID（UUID）
      * @responseField data[].user_id int 用户ID
      * @responseField data[].out_trade_no string|null 第三方订单号
-     * @responseField data[].platform int 支付平台:5=PayPal,8=PromptPay
+     * @responseField data[].platform int 支付平台:1=支付宝,2=微信,3=银联,4=抖音
      * @responseField data[].action int 支付动作
      * @responseField data[].amount float 订单金额（元）
      * @responseField data[].currency string 货币单位

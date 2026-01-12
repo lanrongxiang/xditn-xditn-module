@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\System\Http\Controllers;
 
 use Modules\System\Models\AsyncTask;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

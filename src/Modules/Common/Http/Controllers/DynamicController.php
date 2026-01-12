@@ -9,7 +9,7 @@ namespace Modules\Common\Http\Controllers;
 use Illuminate\Http\Request;
 use Modules\Common\Tables\Permission;
 use Modules\Common\Tables\Role;
-use XditnModule\Base\CatchController;
+use XditnModule\Base\XditnModuleController;
 
 /**
  * @group 管理端
@@ -18,7 +18,7 @@ use XditnModule\Base\CatchController;
  *
  * @subgroupDescription  后台公共演示
  */
-class DynamicController extends CatchController
+class DynamicController extends XditnModuleController
 {
     public function permission(Permission $permission, Request $request)
     {

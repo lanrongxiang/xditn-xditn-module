@@ -1,41 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Pay\Listeners;
 
+use Illuminate\Support\Facades\Log;
 use Modules\Pay\Events\PayNotifyEvent;
-use Modules\Pay\Support\Notify\AirwallexNotify;
-use Modules\Pay\Support\Notify\AliPayNotify;
-use Modules\Pay\Support\Notify\DouYinPayNotify;
-use Modules\Pay\Support\Notify\HaiPayNotify;
-use Modules\Pay\Support\Notify\PayPalNotify;
-use Modules\Pay\Support\Notify\PromptPayNotify;
-use Modules\Pay\Support\Notify\UniPayNotify;
-use Modules\Pay\Support\Notify\WechatPayNotify;
-use Modules\Pay\Support\NotifyData\AirwallexNotifyData;
-use Modules\Pay\Support\NotifyData\AliPayNotifyData;
-use Modules\Pay\Support\NotifyData\DouYinPayNotifyData;
-use Modules\Pay\Support\NotifyData\HaiPayNotifyData;
-use Modules\Pay\Support\NotifyData\PayPalNotifyData;
-use Modules\Pay\Support\NotifyData\PromptPayNotifyData;
-use Modules\Pay\Support\NotifyData\UniPayNotifyData;
-use Modules\Pay\Support\NotifyData\WechatPayNotifyData;
+use Modules\Pay\Gateways\AliPay\AliPayNotify;
+use Modules\Pay\Gateways\AliPay\AliPayNotifyData;
+use Modules\Pay\Gateways\DouYinPay\DouYinPayNotify;
+use Modules\Pay\Gateways\DouYinPay\DouYinPayNotifyData;
+use Modules\Pay\Gateways\UniPay\UniPayNotify;
+use Modules\Pay\Gateways\UniPay\UniPayNotifyData;
+use Modules\Pay\Gateways\WechatPay\WechatPayNotify;
+use Modules\Pay\Gateways\WechatPay\WechatPayNotifyData;
 
+/**
+ * 支付回调监听器.
+ *
+ * 处理各支付平台的回调通知
+ */
 class PayNotifyListener
 {
     /**
-     * Create the event listener.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Handle the event.
-     *
-     * @param PayNotifyEvent $event
      *
      * @throws \Throwable
      */
@@ -43,9 +31,8 @@ class PayNotifyListener
     {
         $notifyData = $event->data;
 
-        \Illuminate\Support\Facades\Log::channel('payment')->info('PayNotifyListener 处理回调', [
+        Log::channel('payment')->info('PayNotifyListener 处理回调', [
             'notify_data_type' => get_class($notifyData),
-            'is_airwallex' => $notifyData instanceof AirwallexNotifyData,
         ]);
 
         if ($notifyData instanceof AliPayNotifyData) {
@@ -62,41 +49,6 @@ class PayNotifyListener
 
         if ($notifyData instanceof DouYinPayNotifyData) {
             (new DouYinPayNotify($notifyData))->notify();
-        }
-
-        if ($notifyData instanceof PayPalNotifyData) {
-            \Illuminate\Support\Facades\Log::channel('payment')->info('PayNotifyListener 调用 PayPalNotify', [
-                'trade_no' => $notifyData->getTradeNo(),
-                'out_trade_no' => $notifyData->getOutTradeNo(),
-                'event_type' => $notifyData->getEventType(),
-                'is_pay_success' => $notifyData->isPaySuccess(),
-            ]);
-            (new PayPalNotify($notifyData))->notify();
-        }
-
-        if ($notifyData instanceof PromptPayNotifyData) {
-            (new PromptPayNotify($notifyData))->notify();
-        }
-
-        if ($notifyData instanceof AirwallexNotifyData) {
-            \Illuminate\Support\Facades\Log::channel('payment')->info('PayNotifyListener 调用 AirwallexNotify', [
-                'trade_no' => $notifyData->getTradeNo(),
-                'out_trade_no' => $notifyData->getOutTradeNo(),
-                'event_type' => $notifyData->getEventType(),
-                'is_pay_success' => $notifyData->isPaySuccess(),
-            ]);
-            (new AirwallexNotify($notifyData))->notify();
-        }
-
-        if ($notifyData instanceof HaiPayNotifyData) {
-            \Illuminate\Support\Facades\Log::channel('payment')->info('PayNotifyListener 调用 HaiPayNotify', [
-                'trade_no' => $notifyData->getTradeNo(),
-                'out_trade_no' => $notifyData->getOutTradeNo(),
-                'status' => $notifyData->getStatus(),
-                'is_pay_success' => $notifyData->isPaySuccess(),
-            ]);
-
-            (new HaiPayNotify($notifyData))->notify();
         }
     }
 }

@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\Log;
 use Modules\Openapi\Exceptions\FailedException;
 use Modules\Pay\Enums\PayPlatform;
 use Modules\Pay\Enums\RefundStatus;
+use Modules\Pay\Gateways\PayFactory;
 use Modules\Pay\Http\Requests\OrderRefundAgreeRequest;
 use Modules\Pay\Models\Order;
 use Modules\Pay\Models\OrderRefund;
-use Modules\Pay\Support\PayFactory;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端
@@ -122,9 +122,6 @@ class OrderRefundController extends Controller
             // 同意退款
             if ($isAgree) {
                 try {
-                    // 锁定用户钱包（如果涉及金币退款）
-                    $wallet = \Modules\VideoSubscription\Models\UserWallet::where('user_id', $order->user_id)->lockForUpdate()->first();
-
                     $platformEnum = $order->platform instanceof PayPlatform ? $order->platform : PayPlatform::from((int) $order->platform);
                     $refundResult = PayFactory::make($platformEnum)->refund([
                         'out_trade_no' => $order->out_trade_no,

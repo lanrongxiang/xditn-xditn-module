@@ -14,7 +14,7 @@ use Modules\User\Models\LogOperate;
 use Modules\User\Models\User;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 use XditnModule\Support\Module\ModuleRepository;
 
 /**

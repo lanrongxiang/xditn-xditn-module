@@ -6,7 +6,7 @@ namespace Modules\System\Http\Controllers;
 
 use Modules\System\Http\Requests\DictionaryValueRequest;
 use Modules\System\Models\DictionaryValues;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

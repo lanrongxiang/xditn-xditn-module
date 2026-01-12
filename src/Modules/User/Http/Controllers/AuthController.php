@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Modules\System\Support\Sms\SmsCode;
 use Modules\User\Http\Requests\SmsCodeRequest;
 use Modules\User\Services\Auth as AuthService;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 use XditnModule\Exceptions\FailedException;
 use XditnModule\Facade\Admin;
 

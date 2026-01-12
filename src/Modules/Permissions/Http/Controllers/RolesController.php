@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Modules\Permissions\Enums\DataRange;
 use Modules\Permissions\Http\Requests\RoleRequest;
 use Modules\Permissions\Models\Roles;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 use XditnModule\Exceptions\FailedException;
 use XditnModule\Facade\Admin;
 

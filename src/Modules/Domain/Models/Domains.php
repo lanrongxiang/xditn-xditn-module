@@ -7,7 +7,7 @@ namespace Modules\Domain\Models;
 use Modules\Domain\Support\Request\AliyunRequest;
 use Modules\Domain\Support\Request\QCloudRequest;
 use Modules\Domain\Support\Request\Request;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 
 /**
  * @property $id

@@ -7,7 +7,7 @@ namespace Modules\Develop\Support\Generate\Create;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Str;
 use Nette\PhpGenerator\PhpFile;
-use XditnModule\Base\CatchController;
+use XditnModule\Base\XditnModuleController;
 use XditnModule\XditnModule;
 
 class Controller extends Creator
@@ -17,7 +17,6 @@ class Controller extends Creator
         public readonly string $model,
         public readonly ?string $request = null,
         public readonly bool $needForm = true,
-        public readonly bool $dynamic = false,
         public readonly array $structures = [],
         public readonly array $operations = [],
     ) {
@@ -43,15 +42,10 @@ class Controller extends Creator
         $request = $this->getRequest();
         $requestBaseName = class_basename($this->getRequest());
         $namespace = $file->addNamespace($this->getControllerNamespace());
-        $namespace->addUse(CatchController::class, 'Controller')
+        $namespace->addUse(XditnModuleController::class, 'Controller')
             ->addUse($this->getModel())
             ->addUse($request)
             ->addUse(\Illuminate\Http\Request::class);
-
-        // 动态表单
-        if ($this->dynamic) {
-            $namespace->addUse($this->getDynamicNamespace(), 'Dynamic');
-        }
 
         $controller = $namespace->addClass($this->getControllerName())
             ->setExtends('Controller')
@@ -176,16 +170,6 @@ class Controller extends Creator
             }
         }
 
-        if ($this->dynamic) {
-            $controller->addMethod('dynamic')
-                ->setBody('return $dynamic();')
-                ->addComment('@param Dynamic $dynamic')
-                ->addComment('@return mixed')
-                ->setReturnType('mixed')
-                ->addParameter('dynamic')->setType('Dynamic');
-
-        }
-
         return $file;
     }
 
@@ -217,10 +201,5 @@ class Controller extends Creator
     protected function getControllerNamespace(): string
     {
         return Str::of(XditnModule::getModuleControllerNamespace($this->module))->rtrim('\\')->toString();
-    }
-
-    protected function getDynamicNamespace(): string
-    {
-        return XditnModule::getModuleNamespace($this->module).'Dynamics\\'.$this->controller;
     }
 }

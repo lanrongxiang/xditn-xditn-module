@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\Develop\Models\SchemaFiles;
 use Modules\Develop\Support\Generate\Create\Controller;
-use Modules\Develop\Support\Generate\Create\Dynamic;
 use Modules\Develop\Support\Generate\Create\Menu;
 use Modules\Develop\Support\Generate\Create\Model;
 use Modules\Develop\Support\Generate\Create\Request;
@@ -76,40 +75,18 @@ class Generator
         try {
             if ($generateFiles) {
                 // 生成文件模式
-                $this->files['dynamic_path'] = $this->createDynamic();
-
-                // 后端文件生成（根据 generateBackend 标志决定是否生成）
-                $generateBackend = $this->gen['generateBackend'] ?? false;
-                if ($generateBackend) {
-                    $this->files['model_path'] = $this->createModel();
-                    $this->files['request_path'] = $this->createRequest();
-                    $this->files['controller_path'] = $this->createController();
-                    $this->createRoute();
-                } else {
-                    // 不生成后端文件时，设置为空
-                    $this->files['model_path'] = false;
-                    $this->files['request_path'] = false;
-                    $this->files['controller_path'] = false;
-                }
+                $this->files['model_path'] = $this->createModel();
+                $this->files['request_path'] = $this->createRequest();
+                $this->files['controller_path'] = $this->createController();
+                $this->createRoute();
 
                 // 生成菜单
-                (new Menu($this->gen))->useDialogForm($this->gen['dialogForm'])->generate();
+                (new Menu($this->gen))->useDialogForm($this->gen['dialogForm'] ?? true)->generate();
             } else {
                 // 不生成文件，只生成内容并保存到数据库
-                $this->files['dynamic_path'] = $this->getDynamicContent();
-
-                // 后端文件内容生成（根据 generateBackend 标志决定是否生成）
-                $generateBackend = $this->gen['generateBackend'] ?? false;
-                if ($generateBackend) {
-                    $this->files['model_path'] = $this->getModelContent();
-                    $this->files['request_path'] = $this->getRequestContent();
-                    $this->files['controller_path'] = $this->getControllerContent();
-                } else {
-                    // 不生成后端文件时，设置为空
-                    $this->files['model_path'] = false;
-                    $this->files['request_path'] = false;
-                    $this->files['controller_path'] = false;
-                }
+                $this->files['model_path'] = $this->getModelContent();
+                $this->files['request_path'] = $this->getRequestContent();
+                $this->files['controller_path'] = $this->getControllerContent();
             }
 
             // 保存文件内容到数据库
@@ -145,23 +122,6 @@ class Generator
         $this->originRouteContent = $route->getOriginContent();
 
         return $route->create();
-    }
-
-    public function createDynamic()
-    {
-        if ($this->gen['dymaic']) {
-            $apiString = (new Route($this->gen['controller']))->setModule($this->gen['module'])->getApiRoute();
-
-            $dynamic = new Dynamic(
-                $this->gen['controller'],
-                $this->structures,
-                $this->gen['form'],
-                $apiString,
-                $this->gen['dialogForm']
-            );
-
-            return $dynamic->setModule($this->gen['module'])->create();
-        }
     }
 
     /**
@@ -205,43 +165,16 @@ class Generator
      */
     protected function createController(): bool|string
     {
-        $controller = new Controller($this->gen['controller'], $this->modelName, $this->requestName, $this->gen['form'], $this->gen['dymaic'], $this->structures, $this->gen['operations']);
-
-        return $controller->setModule($this->gen['module'])->create();
-    }
-
-    /**
-     * 获取动态文件内容（不写入文件）.
-     */
-    protected function getDynamicContent(): array|false
-    {
-        if (!$this->gen['dymaic']) {
-            return false;
-        }
-
-        $apiString = (new Route($this->gen['controller']))->setModule($this->gen['module'])->getApiRoute();
-
-        $dynamic = new Dynamic(
+        $controller = new Controller(
             $this->gen['controller'],
-            $this->structures,
+            $this->modelName,
+            $this->requestName,
             $this->gen['form'],
-            $apiString,
-            $this->gen['dialogForm']
+            $this->structures,
+            $this->gen['operations']
         );
 
-        $dynamic->setModule($this->gen['module']);
-        $content = $dynamic->getContent();
-
-        if ($content instanceof PhpFile) {
-            $printer = new PsrPrinter();
-            $printer->setTypeResolving(false);
-            $content = $printer->printFile($content);
-        }
-
-        return [
-            'path' => $dynamic->getFile(),
-            'content' => $content ?: '',
-        ];
+        return $controller->setModule($this->gen['module'])->create();
     }
 
     /**
@@ -299,7 +232,14 @@ class Generator
      */
     protected function getControllerContent(): array|false
     {
-        $controller = new Controller($this->gen['controller'], $this->modelName, $this->requestName, $this->gen['form'], $this->gen['dymaic'], $this->structures, $this->gen['operations']);
+        $controller = new Controller(
+            $this->gen['controller'],
+            $this->modelName,
+            $this->requestName,
+            $this->gen['form'],
+            $this->structures,
+            $this->gen['operations']
+        );
 
         $controller->setModule($this->gen['module']);
         $content = $controller->getContent();

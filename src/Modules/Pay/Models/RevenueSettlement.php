@@ -6,7 +6,7 @@ namespace Modules\Pay\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Modules\Common\Support\Casts\AmountCast;
-use XditnModule\Base\CatchModel;
+use XditnModule\Base\XditnModuleModel;
 
 /**
  * @property $id
@@ -30,7 +30,7 @@ use XditnModule\Base\CatchModel;
  * @property $created_at
  * @property $updated_at
  */
-class RevenueSettlement extends CatchModel
+class RevenueSettlement extends XditnModuleModel
 {
     use HasUuids;
 
@@ -42,7 +42,7 @@ class RevenueSettlement extends CatchModel
 
     /**
      * 禁用软删除（表没有 deleted_at 字段）
-     * CatchModel 默认包含 SoftDeletes，通过重写 bootSoftDeletes 来禁用.
+     * XditnModuleModel 默认包含 SoftDeletes，通过重写 bootSoftDeletes 来禁用.
      */
     public static function bootSoftDeletes(): void
     {

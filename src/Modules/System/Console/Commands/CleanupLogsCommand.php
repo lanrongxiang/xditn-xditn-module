@@ -66,7 +66,7 @@ class CleanupLogsCommand extends Command
     protected function cleanupCronTasksLog(int $days, bool $dryRun): void
     {
         $cutoffDate = Carbon::now()->subDays($days);
-        // SystemCronTasksLog 使用 CatchModel，created_at 是 unsignedInteger (Unix 时间戳)
+        // SystemCronTasksLog 使用 XditnModuleModel，created_at 是 unsignedInteger (Unix 时间戳)
         $cutoffTimestamp = $cutoffDate->timestamp;
 
         // 统计要删除的记录数
@@ -99,7 +99,7 @@ class CleanupLogsCommand extends Command
     protected function cleanupConnectorLog(int $days, bool $dryRun): void
     {
         $cutoffDate = Carbon::now()->subDays($days);
-        // ConnectorLog 使用 CatchModel，created_at 是 unsignedInteger (Unix 时间戳)
+        // ConnectorLog 使用 XditnModuleModel，created_at 是 unsignedInteger (Unix 时间戳)
         $cutoffTimestamp = $cutoffDate->timestamp;
 
         // 统计要删除的记录数

@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Modules\Develop\Support\ModuleInstall;
 use Modules\Permissions\Models\Permissions;
-use XditnModule\Base\CatchController;
+use XditnModule\Base\XditnModuleController;
 use XditnModule\Contracts\ModuleRepositoryInterface;
 use XditnModule\Exceptions\FailedException;
 use XditnModule\Support\Module\ModuleRepository;
@@ -19,7 +19,7 @@ use XditnModule\Support\Module\ModuleRepository;
  *
  * @subgroupDescription  后台模块管理
  */
-class ModuleController extends CatchController
+class ModuleController extends XditnModuleController
 {
     protected ModuleRepository $repository;
 

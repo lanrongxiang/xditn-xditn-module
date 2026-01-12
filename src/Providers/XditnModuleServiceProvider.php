@@ -33,7 +33,6 @@ class XditnModuleServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->registerClassAliases();
         $this->bootMacros();
         $this->bootDefaultModuleProviders();
         $this->bootModuleProviders();
@@ -211,24 +210,5 @@ class XditnModuleServiceProvider extends ServiceProvider
     protected function routesAreCached(): bool
     {
         return $this->app->routesAreCached();
-    }
-
-    /**
-     * Register class aliases for backward compatibility.
-     *
-     * 为向后兼容注册类别名
-     * - CatchController -> XditnModuleController
-     * - CatchModel -> XditnModuleModel
-     */
-    protected function registerClassAliases(): void
-    {
-        // 兼容旧版本的类名
-        if (!class_exists('XditnModule\Base\CatchController')) {
-            class_alias(\XditnModule\Base\XditnModuleController::class, 'XditnModule\Base\CatchController');
-        }
-
-        if (!class_exists('XditnModule\Base\CatchModel')) {
-            class_alias(\XditnModule\Base\XditnModuleModel::class, 'XditnModule\Base\CatchModel');
-        }
     }
 }

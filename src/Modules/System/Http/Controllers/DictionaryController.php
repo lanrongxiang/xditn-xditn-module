@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 use Modules\Develop\Support\Generate\Create\Enumer;
 use Modules\System\Http\Requests\DictionaryRequest;
 use Modules\System\Models\Dictionary;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 use XditnModule\Enums\Status;
 
 /**

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Openapi\Http\Controllers;
 
 use Modules\Openapi\Models\OpenapiRequestLog;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group OpenAPI接口

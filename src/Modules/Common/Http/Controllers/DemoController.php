@@ -7,7 +7,7 @@
 namespace Modules\Common\Http\Controllers;
 
 use Illuminate\Http\Request;
-use XditnModule\Base\CatchController;
+use XditnModule\Base\XditnModuleController;
 
 /**
  * @group 管理端
@@ -16,7 +16,7 @@ use XditnModule\Base\CatchController;
  *
  * @subgroupDescription  后台公共演示
  */
-class DemoController extends CatchController
+class DemoController extends XditnModuleController
 {
     /**
      * 异常演示.

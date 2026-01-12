@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +15,7 @@ class Area extends Model
     public function getAll()
     {
         if (!Schema::hasTable('areas')) {
-            throw new FailedException('请使用 php artisan catch:areas 获取地区数据源');
+            throw new FailedException('请使用 php artisan xditn:module:areas 获取地区数据源');
         }
 
         return $this->whereIn('level', [1, 2])->get(['id', 'parent_id', 'name'])->toTree(0, 'parent_id')

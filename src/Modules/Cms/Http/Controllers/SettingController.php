@@ -6,7 +6,7 @@ namespace Modules\Cms\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Modules\Cms\Models\Option;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

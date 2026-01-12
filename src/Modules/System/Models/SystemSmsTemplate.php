@@ -6,7 +6,7 @@ namespace Modules\System\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Modules\System\Enums\SmsChannel;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 
 /**
  * @property $id

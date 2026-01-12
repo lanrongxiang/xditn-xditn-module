@@ -6,7 +6,7 @@ namespace Modules\Pay\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use XditnModule\Base\CatchModel;
+use XditnModule\Base\XditnModuleModel;
 
 /**
  * @property $id
@@ -18,7 +18,7 @@ use XditnModule\Base\CatchModel;
  * @property $updated_at
  * @property $deleted_at
  */
-class RechargeOrder extends CatchModel
+class RechargeOrder extends XditnModuleModel
 {
     use HasUuids;
 

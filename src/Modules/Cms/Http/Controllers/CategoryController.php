@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Modules\Cms\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Modules\Cms\Dynamics\Category as CategoryDynamic;
 use Modules\Cms\Models\Category;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 use XditnModule\Exceptions\FailedException;
 
 /**
@@ -15,7 +14,7 @@ use XditnModule\Exceptions\FailedException;
  *
  * @subgroup 分类管理
  *
- * @subgroupDescription  后台内容管理->分类管理
+ * @subgroupDescription 后台内容管理->分类管理
  */
 class CategoryController extends Controller
 {
@@ -40,8 +39,6 @@ class CategoryController extends Controller
      * @responseField data[].children object[] 子分类
      * @responseField data[].order int 排序
      * @responseField data[].created_at string 创建时间
-     *
-     * @return mixed
      */
     public function index(): mixed
     {
@@ -75,10 +72,6 @@ class CategoryController extends Controller
      * @bodyParam type int 类型
      *
      * @responseField data bool
-     *
-     * @param Request $request
-     *
-     * @return mixed
      */
     public function store(Request $request): mixed
     {
@@ -99,15 +92,13 @@ class CategoryController extends Controller
      * @responseField parent_id int 父级ID
      * @responseField order int 排序
      * @responseField type int 类型
-     *
-     * @param $id
-     *
-     * @return mixed
      */
-    public function show($id): mixed
+    public function show(mixed $id): mixed
     {
         return $this->model->firstBy($id);
-    }    /**
+    }
+
+    /**
      * 更新分类.
      *
      * @urlParam id int 分类ID
@@ -119,13 +110,8 @@ class CategoryController extends Controller
      * @bodyParam type int 类型
      *
      * @responseField data bool
-     *
-     * @param $id
-     * @param Request $request
-     *
-     * @return mixed
      */
-    public function update($id, Request $request): mixed
+    public function update(mixed $id, Request $request): mixed
     {
         if ($this->model->where('slug', $request->get('slug'))
             ->where('id', '<>', $id)->first()) {
@@ -145,23 +131,9 @@ class CategoryController extends Controller
      * @urlParam id int 分类ID
      *
      * @responseField data bool
-     *
-     * @param $id
-     *
-     * @return bool|null
      */
-    public function destroy($id): ?bool
+    public function destroy(mixed $id): ?bool
     {
         return $this->model->deleteBy($id);
-    }
-
-    /**
-     * @param CategoryDynamic $category
-     *
-     * @return array
-     */
-    public function dynamic(CategoryDynamic $category)
-    {
-        return $category();
     }
 }

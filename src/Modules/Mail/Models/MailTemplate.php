@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Mail\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 use XditnModule\Enums\Status;
 
 /**

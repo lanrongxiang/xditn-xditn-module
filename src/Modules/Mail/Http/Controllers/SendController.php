@@ -5,9 +5,9 @@ namespace Modules\Mail\Http\Controllers;
 use Illuminate\Http\Request;
 use Modules\Mail\Models\MailTemplate;
 use Modules\Mail\Support\MailService;
-use XditnModule\Base\CatchController;
+use XditnModule\Base\XditnModuleController;
 
-class SendController extends CatchController
+class SendController extends XditnModuleController
 {
     public function to(Request $request, MailTemplate $template)
     {

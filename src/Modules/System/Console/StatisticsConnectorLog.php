@@ -76,7 +76,7 @@ class StatisticsConnectorLog extends Command
         foreach ($pathRequests as &$pathRequest) {
             $pathRequest['average_time_taken'] = intval($pathRequest['time_taken'] / $pathRequest['count']);
             unset($pathRequest['time_taken']);
-            // 添加时间戳字段（CatchModel 使用 Unix 时间戳格式）
+            // 添加时间戳字段（XditnModuleModel 使用 Unix 时间戳格式）
             $pathRequest['created_at'] = $now;
             $pathRequest['updated_at'] = $now;
         }

@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace Modules\Cms\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Modules\Cms\Dynamics\Tag as TagDynamic;
 use Modules\Cms\Models\PostHasTags;
 use Modules\Cms\Models\Tag;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端
  *
  * @subgroup 标签管理
  *
- * @subgroupDescription  后台内容管理->标签管理
+ * @subgroupDescription 后台内容管理->标签管理
  */
 class TagController extends Controller
 {
@@ -50,10 +49,8 @@ class TagController extends Controller
      * @bodyParam name string required 标签名称
      *
      * @responseField data int 标签ID
-     *
-     * @return mixed
      */
-    public function store(Request $request)
+    public function store(Request $request): mixed
     {
         return $this->model->storeBy($request->all());
     }
@@ -62,10 +59,8 @@ class TagController extends Controller
      * 标签详情.
      *
      * @urlParam id int required 标签ID
-     *
-     * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function show($id)
+    public function show(mixed $id): mixed
     {
         return $this->model->firstBy($id);
     }
@@ -76,10 +71,8 @@ class TagController extends Controller
      * @urlParam id int required 标签ID
      *
      * @bodyParam name string required 标签名称
-     *
-     * @return mixed
      */
-    public function update($id, Request $request)
+    public function update(mixed $id, Request $request): mixed
     {
         return $this->model->updateBy($id, $request->all());
     }
@@ -88,20 +81,13 @@ class TagController extends Controller
      * 删除标签.
      *
      * @urlParam id int required 标签ID
-     *
-     * @return bool
      */
-    public function destroy($id)
+    public function destroy(mixed $id): bool
     {
         return $this->model->deletesBy($id, callback: function ($ids) {
             foreach ($ids as $id) {
                 PostHasTags::where('tag_id', $id)->delete();
             }
         });
-    }
-
-    public function dynamic(TagDynamic $tag): array
-    {
-        return $tag();
     }
 }

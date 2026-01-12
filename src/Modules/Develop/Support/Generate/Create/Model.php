@@ -22,7 +22,7 @@ use Illuminate\Support\Str;
 use Nette\PhpGenerator\Dumper;
 use Nette\PhpGenerator\Literal;
 use Nette\PhpGenerator\PhpFile;
-use XditnModule\Base\CatchModel;
+use XditnModule\Base\XditnModuleModel;
 use XditnModule\Traits\DB\BaseOperate;
 use XditnModule\Traits\DB\DateformatTrait;
 use XditnModule\Traits\DB\ScopeTrait;
@@ -83,7 +83,7 @@ class Model extends Creator
         $namespace = $file->addNamespace($this->getModelNamespace());
 
         if ($this->softDelete) {
-            $namespace->addUse(CatchModel::class, 'Model');
+            $namespace->addUse(XditnModuleModel::class, 'Model');
         } else {
             $namespace->addUse(\Illuminate\Database\Eloquent\Model::class);
             $namespace->addUse(DateformatTrait::class);

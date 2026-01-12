@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Pay\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use XditnModule\Base\CatchModel;
+use XditnModule\Base\XditnModuleModel;
 
 /**
  * @property $id
@@ -22,7 +22,7 @@ use XditnModule\Base\CatchModel;
  * @property $status
  * @property $sort
  */
-class RechargeActivity extends CatchModel
+class RechargeActivity extends XditnModuleModel
 {
     protected $table = 'recharge_activities';
 

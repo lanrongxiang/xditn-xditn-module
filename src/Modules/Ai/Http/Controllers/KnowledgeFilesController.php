@@ -6,7 +6,7 @@ namespace Modules\Ai\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Modules\Ai\Models\KnowledgeFiles;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @class AiKnowledgeFilesController

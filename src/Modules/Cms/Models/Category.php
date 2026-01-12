@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Cms\Models;
 
 use Modules\Cms\Enums\CategoryType;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 
 /**
  * @property $id

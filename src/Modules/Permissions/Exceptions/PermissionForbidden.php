@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Permissions\Exceptions;
 
 use Symfony\Component\HttpFoundation\Response;
 use XditnModule\Enums\Code;
-use XditnModule\Exceptions\CatchException;
+use XditnModule\Exceptions\XditnModuleException;
 
-class PermissionForbidden extends CatchException
+class PermissionForbidden extends XditnModuleException
 {
     protected $message = 'permission forbidden';
 

@@ -7,7 +7,7 @@ namespace Modules\System\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Modules\System\Models\PersonalAccessTokens;
 use Modules\User\Models\User;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 use XditnModule\Facade\Admin;
 
 /**

@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use Modules\Permissions\Models\Roles;
 use Modules\System\Models\RoleHasColumns;
 use Modules\System\Models\TableColumn;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端

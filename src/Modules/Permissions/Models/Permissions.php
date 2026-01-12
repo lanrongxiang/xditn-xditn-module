@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Permissions\Enums\MenuStatus;
 use Modules\Permissions\Enums\MenuType;
-use XditnModule\Base\CatchModel as Model;
+use XditnModule\Base\XditnModuleModel as Model;
 use XditnModule\Enums\Status;
 use XditnModule\Exceptions\FailedException;
 use XditnModule\XditnModule;

@@ -73,7 +73,7 @@ class ConnectorLogRecord extends Command
     public function save()
     {
         try {
-            // 确保所有日志都包含时间戳（CatchModel 使用 Unix 时间戳格式）
+            // 确保所有日志都包含时间戳（XditnModuleModel 使用 Unix 时间戳格式）
             $now = time();
             foreach ($this->logs as &$log) {
                 if (empty($log['created_at'])) {

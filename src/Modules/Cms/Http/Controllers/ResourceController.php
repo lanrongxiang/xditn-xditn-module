@@ -6,17 +6,16 @@ namespace Modules\Cms\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Modules\Cms\Dynamics\Resource as ResourceDynamic;
 use Modules\Cms\Enums\ResourceType;
 use Modules\Cms\Models\Resource;
-use XditnModule\Base\CatchController as Controller;
+use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端
  *
  * @subgroup 资源管理
  *
- * @subgroupDescription  后台内容管理->资源管理
+ * @subgroupDescription 后台内容管理->资源管理
  */
 class ResourceController extends Controller
 {
@@ -44,8 +43,6 @@ class ResourceController extends Controller
      * @responseField data[].description string 资源描述
      * @responseField data[].is_visible int 是否可见:1 可见 2 不可见
      * @responseField data[].created_at string 创建时间
-     *
-     * @return mixed
      */
     public function index(): mixed
     {
@@ -61,12 +58,8 @@ class ResourceController extends Controller
      * @bodyParam is_target int required 是否打开新窗口:1 打开 2 不打开
      * @bodyParam description string 资源描述
      * @bodyParam is_visible int 是否可见:1 可见 2 不可见
-     *
-     * @param Request $request
-     *
-     * @return mixed
      */
-    public function store(Request $request)
+    public function store(Request $request): mixed
     {
         $data = $request->all();
         if (ResourceType::FRIEND_LINK->assert($data['type'])) {
@@ -92,12 +85,8 @@ class ResourceController extends Controller
      * @responseField data.description string 资源描述
      * @responseField data.is_visible int 是否可见:1 可见 2 不可见
      * @responseField data.created_at string 创建时间
-     *
-     * @param $id
-     *
-     * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function show($id)
+    public function show(mixed $id): ?Model
     {
         return $this->model->firstBy($id);
     }
@@ -113,13 +102,8 @@ class ResourceController extends Controller
      * @bodyParam is_target int required 是否打开新窗口:1 打开 2 不打开
      * @bodyParam description string 资源描述
      * @bodyParam is_visible int 是否可见:1 可见 2 不可见
-     *
-     * @param $id
-     * @param Request $request
-     *
-     * @return Model|null
      */
-    public function update($id, Request $request)
+    public function update(mixed $id, Request $request): mixed
     {
         $data = $request->all();
         if (ResourceType::FRIEND_LINK->assert($data['type'])) {
@@ -133,37 +117,19 @@ class ResourceController extends Controller
      * 删除资源.
      *
      * @urlParam id int required 资源ID
-     *
-     * @param $id
-     *
-     * @return bool|null
      */
-    public function destroy($id)
+    public function destroy(mixed $id): bool
     {
         return $this->model->deletesBy($id);
     }
 
     /**
-     * 资源可见
+     * 资源可见.
      *
      * @urlParam id int required 资源ID
-     *
-     * @param $id
-     *
-     * @return bool|int
      */
-    public function enable($id): bool|int
+    public function enable(mixed $id): bool|int
     {
         return $this->model->toggleBy($id, 'is_visible');
-    }
-
-    /**
-     * @param ResourceDynamic $resource
-     *
-     * @return array
-     */
-    public function dynamic(ResourceDynamic $resource): array
-    {
-        return $resource();
     }
 }

@@ -6,7 +6,7 @@ namespace Modules\Pay\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use XditnModule\Base\CatchModel;
+use XditnModule\Base\XditnModuleModel;
 
 /**
  * @property $id
@@ -21,7 +21,7 @@ use XditnModule\Base\CatchModel;
  * @property $updated_at
  * @property $deleted_at
  */
-class SubscriptionOrder extends CatchModel
+class SubscriptionOrder extends XditnModuleModel
 {
     use HasUuids;
 
@@ -149,21 +149,5 @@ class SubscriptionOrder extends CatchModel
     public function order()
     {
         return $this->belongsTo(Order::class, 'id', 'id');
-    }
-
-    /**
-     * 关联订阅.
-     */
-    public function subscription()
-    {
-        return $this->belongsTo(\Modules\VideoSubscription\Models\Subscription::class, 'subscription_id');
-    }
-
-    /**
-     * 关联套餐.
-     */
-    public function plan()
-    {
-        return $this->belongsTo(\Modules\VideoSubscription\Models\VipPlan::class, 'plan_id');
     }
 }

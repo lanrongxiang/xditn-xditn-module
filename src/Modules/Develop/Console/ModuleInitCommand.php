@@ -1,14 +1,6 @@
 <?php
 
-// +----------------------------------------------------------------------
-// | XditnModule [Just Like ～ ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2017 ~ now https://XditnModule.vip All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed ( https://github.com/JaguarJack/XditnModule/blob/master/LICENSE.md )
-// +----------------------------------------------------------------------
-// | Author: JaguarJack [ njphper@gmail.com ]
-// +----------------------------------------------------------------------
+declare(strict_types=1);
 
 namespace Modules\Develop\Console;
 
@@ -22,13 +14,10 @@ use XditnModule\XditnModule;
 
 class ModuleInitCommand extends Command
 {
-    protected $signature = 'catch:module:init';
+    protected $signature = 'xditn:module:init';
 
     protected $description = '初始化一个模块插件';
 
-    /**
-     * @return void
-     */
     public function handle(): void
     {
         $title = text('模块名称', '请输入模块中文名称', required: true, validate: 'min:2,max:15');
