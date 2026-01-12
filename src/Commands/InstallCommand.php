@@ -310,15 +310,12 @@ class InstallCommand extends XditnModuleCommand
             // 获取要安装的模块列表
             $modulesToInstall = $this->getModulesToInstall();
 
+            // 按优先级排序模块（核心模块优先）
+            $modulesToInstall = $this->sortModulesByPriority($modulesToInstall);
+
             $this->info('准备安装模块: '.implode(', ', $modulesToInstall));
 
-            // 安装默认模块（user, develop）
-            foreach (['user', 'develop'] as $name) {
-                $this->info("迁移模块 [{$name}]...");
-                $this->migrateModule($name);
-            }
-
-            // 安装指定模块和默认模块
+            // 安装所有模块
             foreach ($modulesToInstall as $name) {
                 $this->info("安装模块 [{$name}]...");
                 try {
@@ -628,8 +625,37 @@ class InstallCommand extends XditnModuleCommand
 
         // 如果没有指定模块，安装默认的核心模块
         if (empty($modules)) {
-            $modules = ['permissions', 'system'];
+            $modules = ['User', 'Permissions', 'System'];
         }
+
+        return $modules;
+    }
+
+    /**
+     * 按优先级排序模块.
+     * 核心模块优先安装，避免依赖问题.
+     *
+     * @param array<string> $modules
+     *
+     * @return array<string>
+     */
+    protected function sortModulesByPriority(array $modules): array
+    {
+        // 定义模块优先级（数字越小优先级越高）
+        $priority = [
+            'User' => 1,        // 用户模块最先
+            'Permissions' => 2, // 权限模块第二（很多模块依赖它）
+            'System' => 3,      // 系统模块第三
+            'Common' => 4,      // 公共模块
+            'Develop' => 5,     // 开发工具
+        ];
+
+        usort($modules, function ($a, $b) use ($priority) {
+            $priorityA = $priority[$a] ?? 100;
+            $priorityB = $priority[$b] ?? 100;
+
+            return $priorityA <=> $priorityB;
+        });
 
         return $modules;
     }
