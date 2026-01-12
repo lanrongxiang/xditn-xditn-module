@@ -13,7 +13,7 @@ use XditnModule\Support\Module\Installer;
 
 final class XditnModule
 {
-    public const VERSION = '0.1.0';
+    public const VERSION = '1.0.0';
 
     /**
      * Get version.
@@ -26,6 +26,14 @@ final class XditnModule
     public static function moduleRoot(): string
     {
         return config('xditn.module.root', 'modules/');
+    }
+
+    /**
+     * 获取包内模块路径.
+     */
+    public static function packageModulesPath(): string
+    {
+        return dirname(__DIR__).DIRECTORY_SEPARATOR.'src'.DIRECTORY_SEPARATOR.'Modules'.DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -50,9 +58,17 @@ final class XditnModule
 
     /**
      * module dir.
+     * 优先查找包内模块，如果不存在则查找项目目录.
      */
     public static function getModulePath(string $module, bool $make = true): string
     {
+        // 首先检查包内是否存在该模块
+        $packageModulePath = self::packageModulesPath().ucfirst($module).DIRECTORY_SEPARATOR;
+        if (File::isDirectory($packageModulePath)) {
+            return $packageModulePath;
+        }
+
+        // 如果包内不存在，则使用项目目录
         if ($make) {
             return self::makeDir(self::moduleRootPath().ucfirst($module).DIRECTORY_SEPARATOR);
         }
@@ -74,9 +90,17 @@ final class XditnModule
 
     /**
      * module path exists.
+     * 检查包内或项目目录是否存在该模块.
      */
     public static function isModulePathExist(string $module): bool
     {
+        // 检查包内模块
+        $packageModulePath = self::packageModulesPath().ucfirst($module).DIRECTORY_SEPARATOR;
+        if (File::isDirectory($packageModulePath)) {
+            return true;
+        }
+
+        // 检查项目模块
         return File::isDirectory(self::moduleRootPath().ucfirst($module).DIRECTORY_SEPARATOR);
     }
 
@@ -98,10 +122,23 @@ final class XditnModule
 
     /**
      * Get modules directories.
+     * 合并包内模块和项目模块目录.
      */
     public static function getModulesPath(): array
     {
-        return File::directories(self::moduleRootPath());
+        $paths = [];
+
+        // 包内模块
+        if (File::isDirectory(self::packageModulesPath())) {
+            $paths = array_merge($paths, File::directories(self::packageModulesPath()));
+        }
+
+        // 项目模块目录
+        if (File::isDirectory(self::moduleRootPath())) {
+            $paths = array_merge($paths, File::directories(self::moduleRootPath()));
+        }
+
+        return array_unique($paths);
     }
 
     /**
@@ -339,9 +376,9 @@ final class XditnModule
     /**
      * @throws BindingResolutionException
      */
-    public static function getAllModules(): mixed
+    public static function getAllModules(array $search = []): mixed
     {
-        return app()->make(ModuleRepositoryInterface::class)->all();
+        return app()->make(ModuleRepositoryInterface::class)->all($search);
     }
 
     /**
@@ -349,15 +386,29 @@ final class XditnModule
      */
     public static function getAllProviders(): array
     {
-        $dirs = File::directories(self::moduleRootPath());
         $providers = [];
 
-        foreach ($dirs as $dir) {
-            $moduleName = pathinfo($dir, PATHINFO_BASENAME);
-            $provider = self::getModuleServiceProvider($moduleName);
+        // 包内模块
+        if (File::isDirectory(self::packageModulesPath())) {
+            foreach (File::directories(self::packageModulesPath()) as $dir) {
+                $moduleName = pathinfo($dir, PATHINFO_BASENAME);
+                $provider = self::getModuleServiceProvider($moduleName);
 
-            if (class_exists($provider)) {
-                $providers[] = $provider;
+                if (class_exists($provider)) {
+                    $providers[] = $provider;
+                }
+            }
+        }
+
+        // 项目模块
+        if (File::isDirectory(self::moduleRootPath())) {
+            foreach (File::directories(self::moduleRootPath()) as $dir) {
+                $moduleName = pathinfo($dir, PATHINFO_BASENAME);
+                $provider = self::getModuleServiceProvider($moduleName);
+
+                if (class_exists($provider) && !in_array($provider, $providers)) {
+                    $providers[] = $provider;
+                }
             }
         }
 

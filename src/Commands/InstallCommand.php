@@ -165,22 +165,46 @@ class InstallCommand extends XditnModuleCommand
      */
     protected function checkDependenciesTools(): void
     {
-        $executeFinder = new ExecutableFinder;
-        $composer = $executeFinder->find('composer');
-        $git = $executeFinder->find('git');
-        if (! $git) {
-            $this->error('Git 未安装');
-            exit;
-        }
-        if (! $composer) {
-            $this->error('Composer 未安装');
-            exit;
-        }
-
         if (! function_exists('exec')) {
             $this->error('exec 函数未开启，请开启 exec 函数');
             exit;
         }
+
+        // 检测 Git
+        if (! $this->isCommandAvailable('git')) {
+            $this->error('Git 未安装');
+            exit;
+        }
+
+        // 检测 Composer
+        if (! $this->isCommandAvailable('composer')) {
+            $this->error('Composer 未安装');
+            exit;
+        }
+    }
+
+    /**
+     * 检测命令是否可用.
+     */
+    protected function isCommandAvailable(string $command): bool
+    {
+        // 优先使用 ExecutableFinder
+        $executeFinder = new ExecutableFinder;
+        if ($executeFinder->find($command)) {
+            return true;
+        }
+
+        // Windows 使用 where 命令
+        if (PHP_OS_FAMILY === 'Windows') {
+            exec("where {$command} 2>nul", $output, $returnCode);
+
+            return $returnCode === 0;
+        }
+
+        // Linux/macOS 使用 which 命令
+        exec("which {$command} 2>/dev/null", $output, $returnCode);
+
+        return $returnCode === 0;
     }
 
     /**
@@ -427,8 +451,6 @@ class InstallCommand extends XditnModuleCommand
     {
         $this->addPsr4Autoload();
 
-        $this->info('🎉 XditnModule 已安装, 欢迎!');
-
         $this->isFinished = true;
 
         $this->output->info(sprintf('
@@ -444,30 +466,7 @@ class InstallCommand extends XditnModuleCommand
  初始账号: admin@xditn.com
  初始密码: xditn', XditnModule::VERSION));
 
-        $this->support();
-    }
-
-    /**
-     * support.
-     */
-    protected function support(): void
-    {
-        $answer = $this->askFor('非常感谢支持我们! 是否打开文档', 'yes', true);
-
-        if (in_array(strtolower($answer), ['yes', 'y'])) {
-            if (PHP_OS_FAMILY == 'Darwin') {
-                exec('open https://doc.XditnModule.vip/start/overview');
-            }
-            if (PHP_OS_FAMILY == 'Windows') {
-                exec('start https://doc.XditnModule.vip/start/overview');
-            }
-            if (PHP_OS_FAMILY == 'Linux') {
-                exec('xdg-open https://doc.XditnModule.vip/start/overview');
-            }
-        }
-
-        $this->info('官 网: https://XditnModule.vip');
-        $this->info('文 档: https://doc.XditnModule.vip/start/overview');
+        $this->info('🎉 XditnModule 已安装, 欢迎!');
         $this->info('启动后端: php artisan serve');
     }
 
