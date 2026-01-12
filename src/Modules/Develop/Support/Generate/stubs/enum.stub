@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Common\Enums;
+
+use XditnModule\Enums\Enum;
+use XditnModule\Enums\EnumTrait;
+
+enum {ENUM_CLASS}: {TYPE} implements Enum
+{
+    use EnumTrait;
+
+    {CASE}
+
+    /**
+     * Get the label (human-readable name).
+     */
+    public function label(): string
+    {
+        return match ($this) {
+            {NAME}
+        };
+    }
+}

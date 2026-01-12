@@ -1,0 +1,74 @@
+{
+    "name": "xditn/xditn-module",
+    "description": "Laravel modular admin framework core package with CRUD generation, permission control, and API versioning",
+    "keywords": [
+        "laravel",
+        "module",
+        "admin",
+        "crud",
+        "api",
+        "framework"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/xditn/xditn-module",
+    "support": {
+        "issues": "https://github.com/xditn/xditn-module/issues",
+        "source": "https://github.com/xditn/xditn-module"
+    },
+    "require": {
+        "php": "^8.2",
+        "ext-pdo": "*",
+        "ext-zip": "*",
+        "laravel/framework": "^11.0|^12.0",
+        "laravel/sanctum": "^4.0",
+        "maatwebsite/excel": "^3.1",
+        "w7corp/easywechat": "^6.17",
+        "nette/php-generator": "^4.1",
+        "intervention/image-laravel": "^1.5",
+        "mews/captcha": "^3.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "orchestra/testbench": "^9.0|^10.0",
+        "laravel/pint": "^1.27",
+        "knuckleswtf/scribe": "^4.0",
+        "mockery/mockery": "^1.6"
+    },
+    "autoload": {
+        "files": [
+            "src/Support/helpers.php"
+        ],
+        "psr-4": {
+            "XditnModule\\": "src/",
+            "Modules\\": "src/Modules/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/",
+            "Modules\\": "src/Modules/"
+        }
+    },
+    "authors": [
+        {
+            "name": "xditn",
+            "email": "lanrongxiang@gmail.com",
+            "homepage": "https://github.com/xditn"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "XditnModule\\Providers\\XditnModuleServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "preferred-install": "dist",
+        "optimize-autoloader": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

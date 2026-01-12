@@ -1,0 +1,1564 @@
+# XditnModule 项目代码规范
+
+## 基础规范
+
+### PHP/Laravel 规范
+- 使用 PHP 8.2+ 特性
+- 所有 PHP 文件必须在第一行使用 `declare(strict_types=1);`
+- 遵循 PSR-12 编码标准
+- 使用 Laravel Pint 进行代码格式化（`php vendor/bin/pint`）
+- 使用 4 个空格缩进，不使用 Tab
+- 文件末尾必须有空行
+
+### 命名规范
+- 类名使用 PascalCase：`UserController`
+- 方法名使用 camelCase：`getUserList()`
+- 变量名使用 camelCase：`$userService`
+- 常量使用 UPPER_SNAKE_CASE：`MAX_LENGTH`
+- 文件名与类名保持一致
+
+## 控制器规范
+
+### 代码优雅性原则
+- **控制器必须保持简洁**：控制器方法应该只负责协调，不包含业务逻辑
+- **使用 FormRequest 进行验证**：所有请求验证和参数判断必须在 FormRequest 类中完成
+- **控制器方法应该简短**：单个方法不应超过 50 行，复杂逻辑应抽离到服务类
+- **避免在控制器中直接操作数据库**：所有数据库操作应在服务类或模型中完成
+- **避免在控制器中进行复杂的条件判断**：复杂判断逻辑应放在 FormRequest 或服务类中
+- **使用依赖注入**：通过构造函数注入依赖，使用 `readonly` 关键字修饰只读属性
+
+### FormRequest 使用规范
+- **所有需要验证的请求必须使用 FormRequest**：禁止在控制器中使用 `$request->validate()`
+- **FormRequest 应包含验证规则和自定义验证逻辑**：如金额限制、业务规则验证等
+- **FormRequest 应提供便捷方法**：如 `getAmount()`, `getActivityId()` 等，避免在控制器中重复类型转换
+- **自定义验证逻辑**：使用 `withValidator()` 方法添加自定义验证规则
+- **错误消息**：所有验证错误消息应在 `messages()` 方法中定义，使用多语言键
+
+**正确示例：**
+```php
+// FormRequest
+class CreateRechargeOrderRequest extends FormRequest
+{
+    public function rules(): array
+    {
+        return [
+            'amount' => 'required|numeric|min:0.01',
+            'activity_id' => 'nullable|integer|exists:recharge_activities,id',
+        ];
+    }
+
+    public function getAmount(): float
+    {
+        return (float) $this->input('amount');
+    }
+
+    public function validateAmount(): void
+    {
+        // 自定义验证逻辑
+    }
+}
+
+// Controller
+public function createRechargeOrder(CreateRechargeOrderRequest $request): JsonResponse
+{
+    $amount = $request->getAmount();
+    // 业务逻辑...
+}
+```
+
+**错误示例（禁止）：**
+```php
+// ❌ 错误：在控制器中进行验证和判断
+public function createRechargeOrder(Request $request): JsonResponse
+{
+    $request->validate([...]);
+    
+    $amount = (float) $request->input('amount');
+    
+    if ($amount < $minAmount) {
+        return ApiResponse::error(...);
+    }
+    
+    // 业务逻辑...
+}
+```
+
+### 文档注释要求
+所有控制器方法必须包含完整的 Scribe API 文档注释：
+
+1. **类级别注释**（必需）：
+```php
+/**
+ * @group 管理端|OpenAPI接口
+ *
+ * @subgroup 功能分组名称
+ *
+ * @subgroupDescription 功能描述
+ */
+```
+
+2. **方法级别注释**（必需）：
+```php
+/**
+ * 方法功能描述
+ *
+ * @urlParam id int required 参数描述
+ * @queryParam page int 页码
+ * @bodyParam name string required 参数名称
+ * @bodyParam data object 对象参数
+ * @bodyParam data.field string 嵌套字段
+ *
+ * @responseField code int 状态码
+ * @responseField message string 提示信息
+ * @responseField data object|object[] 响应数据
+ * @responseField data.id int 数据ID
+ * @responseField data[].name string 数组项字段
+ *
+ * @param Request $request
+ * @return JsonResponse
+ */
+```
+
+### 接口分组规范
+- **管理端接口**：`modules/*/Http/Controllers` 下的路由，使用 `@group 管理端`
+- **OpenAPI接口**：OpenAPI 相关路由，使用 `@group OpenAPI接口`
+
+### 多语言规范
+- **管理端接口**：管理后台的错误消息使用硬编码中文，不使用多语言转换
+- 所有多语言键定义在 `lang/{locale}/exception.php` 或其他对应的语言文件中
+
+### 响应格式规范
+
+#### 管理端接口（XditnModule\Base\XditnModuleController）
+- **直接返回数组或模型结果**：`XditnModuleController` 会自动将返回值包装为成功响应
+- **标准 CRUD 操作**：直接返回模型方法的结果，框架会自动处理响应格式
+  - 列表：`return $this->model->getList();`
+  - 详情：`return $this->model->firstBy($id);` 或 `return $model;`
+  - 创建：`return $this->model->storeBy($data);`
+  - 更新：`return $this->model->updateBy($id, $data);`
+  - 删除：`return $this->model->deleteBy($id);`
+- **自定义响应**：直接返回数组即可，框架会自动包装为成功响应
+  - 成功响应：`return ['message' => '操作成功'];` 或 `return $data;`
+  - 错误响应：使用异常 `throw new FailedException('错误信息');`
+- **特殊响应格式**：如果需要特定的响应格式，使用 `XditnModule\Support\ResponseBuilder`
+  - 示例：`return ResponseBuilder::success()->with('hello', 'world');`
+  - 示例：`return ResponseBuilder::code(10000)->with('hello', 'world')->message('Hello world');`
+
+**正确示例（管理端）：**
+```php
+use XditnModule\Base\XditnModuleController as Controller;
+use XditnModule\Exceptions\FailedException;
+
+class HomeCategoryController extends Controller
+{
+    // ✅ 正确：直接返回模型方法结果
+    public function index(): mixed
+    {
+        return $this->model->getList();
+    }
+    
+    // ✅ 正确：直接返回模型实例
+    public function show(int $id): mixed
+    {
+        $category = $this->model->where('id', $id)->first();
+        if (!$category) {
+            throw new FailedException('分类不存在');
+        }
+        return $category;
+    }
+    
+    // ✅ 正确：直接返回数组
+    public function customMethod(): array
+    {
+        return ['message' => '操作成功'];
+    }
+    
+    // ✅ 正确：使用异常返回错误
+    public function validateData(): array
+    {
+        if ($someCondition) {
+            throw new FailedException('验证失败');
+        }
+        return ['status' => 'ok'];
+    }
+    
+    // ✅ 正确：使用 ResponseBuilder 构建特殊响应格式
+    public function specialResponse(): mixed
+    {
+        return ResponseBuilder::success()
+            ->with('hello', 'world')
+            ->with('hi', 'world');
+    }
+}
+```
+
+## 模型规范
+
+### Fillable 属性
+- 所有可批量赋值的字段必须在 `$fillable` 数组中声明
+- 避免使用 `$guarded = []`，明确声明 `$fillable`
+- **禁止将时间戳字段放入 `$fillable`**：`created_at`、`updated_at`、`deleted_at` 等时间戳字段**禁止**放在 `$fillable` 数组中
+  - 时间戳字段由 `BaseOperate` Trait 的 `filterData()` 方法自动管理
+  - 将时间戳字段放入 `$fillable` 可能导致时间戳被设置为 0，显示为 `1970-01-01 08:00:00`
+  - 如果需要在查询时返回时间戳字段，应该在 `$fields` 数组中声明，而不是 `$fillable`
+
+### $fillable 与 $fields 的区别
+- **`$fillable`**：定义可以批量赋值的字段（用于 create/update 操作）
+- **`$fields`**：定义 `getList()` 查询时返回的字段（用于 select 操作）
+- 时间戳字段应该放在 `$fields` 中，而不是 `$fillable` 中
+
+### PHPDoc 注释
+```php
+/**
+ * @property int $id
+ * @property string $name
+ * @property int $created_at
+ */
+class Model extends XditnModuleModel
+{
+    protected $fillable = ['id', 'name'];  // ✅ 正确：不包含 created_at
+    protected array $fields = ['id', 'name', 'created_at'];  // ✅ 正确：在 $fields 中声明用于查询返回
+}
+```
+
+**错误示例（禁止）：**
+```php
+// ❌ 错误：将时间戳字段放入 $fillable
+protected $fillable = ['id', 'name', 'created_at', 'updated_at'];
+
+// 这会导致时间戳可能被设置为 0，显示为 1970-01-01 08:00:00
+```
+
+### Attribute 访问器规范
+- **必须使用** `new Attribute()` 而不是 `Attribute::make()`
+- **必须使用** `protected` 修饰符，而不是 `public`
+- 对于需要追加到 JSON 的属性，必须在 `$appends` 数组中声明
+- **禁止使用** `getXxxAttribute()` 方法，必须使用 `protected function xxx(): Attribute` 格式
+
+### AmountTrait 金额处理规范（推荐）
+`AmountTrait` 提供统一的金额处理功能，自动处理金额字段的入库（分）和出库（系统单位）转换。
+
+**配置**（`config/xditn.php`）：
+```php
+'amount' => [
+    'conversion_rate' => 100, // 转换比例，例如 100 表示 1 USD = 100 分
+    'default_currency' => 'USD', // 默认货币单位
+],
+```
+
+**使用方法**：
+```php
+use XditnModule\Base\XditnModuleModel;
+use XditnModule\Traits\DB\AmountTrait;
+
+class RechargeOrder extends XditnModuleModel
+{
+    use AmountTrait;
+
+    protected $table = 'recharge_orders';
+    protected $fillable = ['id', 'user_id', 'amount', 'discount_amount'];
+
+    /**
+     * 金额字段列表
+     * 这些字段入库为分，出库为系统单位
+     */
+    protected array $amountFields = ['amount', 'discount_amount'];
+
+    /**
+     * 可选：自定义转换比例（如果与默认值不同）
+     */
+    // protected int $amountConversionRate = 100;
+}
+```
+
+**工作原理**：
+- **入库时**：API 传递系统单位（如 `100.50` USD），自动转换为分（`10050`）存储
+- **出库时**：数据库读取为分（如 `10050`），自动转换为系统单位（`100.50` USD）返回
+- **API 传参**：统一使用系统单位传递
+
+**注意事项**：
+- 数据库字段类型应使用 `integer` 或 `bigInteger` 存储分
+- 使用 `round()` 函数确保转换精度，避免浮点数误差
+- null 值会自动处理
+
+### Cacheable 缓存装饰器 Trait（推荐）
+`Cacheable` 提供统一的缓存处理功能，支持缓存标签、自定义 TTL、防止缓存穿透等。
+
+**使用方法**：
+```php
+use XditnModule\Traits\DB\Cacheable;
+
+class UserService
+{
+    use Cacheable;
+
+    // 可选：自定义缓存前缀（默认使用类名）
+    protected ?string $cachePrefix = 'user';
+
+    // 可选：自定义缓存时间（默认 3600 秒）
+    protected int $cacheTTL = 3600;
+
+    // 可选：缓存标签（需要 Redis 等支持标签的驱动）
+    protected array $cacheTags = ['users'];
+
+    public function getUser(int $id): ?User
+    {
+        return $this->remember("user:{$id}", fn () => User::find($id));
+    }
+
+    public function updateUser(int $id, array $data): User
+    {
+        $user = User::find($id);
+        $user->update($data);
+
+        // 清除缓存
+        $this->forgetCache("user:{$id}");
+
+        return $user;
+    }
+}
+```
+
+**核心方法**：
+- `remember(string $key, Closure $callback, ?int $ttl = null)` - 缓存回调结果
+- `rememberForever(string $key, Closure $callback)` - 永久缓存
+- `rememberWithLock(string $key, Closure $callback, ?int $ttl = null)` - 带锁缓存（防止缓存穿透）
+- `getCache(string $key, mixed $default = null)` - 获取缓存
+- `putCache(string $key, mixed $value, ?int $ttl = null)` - 设置缓存
+- `forgetCache(string $key)` - 删除缓存
+- `forgetCaches(array $keys)` - 批量删除缓存
+- `flushCache()` - 清空标签下所有缓存（需要 Redis）
+- `hasCache(string $key)` - 检查缓存是否存在
+- `incrementCache(string $key, int $value = 1)` - 原子递增
+- `decrementCache(string $key, int $value = 1)` - 原子递减
+
+**在 Model 中使用**：
+```php
+class User extends XditnModuleModel
+{
+    use Cacheable;
+
+    // 使用表名作为缓存前缀
+    public function getCachePrefix(): string
+    {
+        return $this->getTable();
+    }
+
+    public function getListWithCache(): mixed
+    {
+        return $this->remember('list', fn () => $this->getList());
+    }
+}
+```
+
+**注意事项**：
+- 缓存标签功能需要 Redis、Memcached 等支持标签的驱动
+- `rememberWithLock()` 可防止缓存击穿，适用于高并发场景
+- 更新数据后记得清除相关缓存
+
+**正确示例：**
+```php
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
+class Model extends XditnModuleModel
+{
+    // 如果需要追加到 JSON，必须声明
+    protected $appends = ['result', 'full_url'];
+
+    /**
+     * 结果字段转换
+     */
+    protected function result(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => Str::startsWith($value, 'http') ? $value : config('app.url').'/'.$value
+        );
+    }
+
+    /**
+     * 金额转换（分转元）- 推荐使用 AmountTrait
+     */
+    protected function amount(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => (int)($value * 100)
+        );
+    }
+
+    /**
+     * 从关联模型继承的属性
+     */
+    protected function accessType(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->related->access_type ?? null
+        );
+    }
+}
+```
+
+**错误示例（禁止）：**
+```php
+// ❌ 错误：使用 Attribute::make()
+public function amount(): Attribute
+{
+    return Attribute::make(
+        get: fn ($value) => $value / 100
+    );
+}
+
+// ❌ 错误：使用 getXxxAttribute() 方法
+public function getAccessTypeAttribute()
+{
+    return $this->video->access_type ?? null;
+}
+```
+
+## 枚举（Enum）规范
+
+### 枚举接口和 Trait
+所有枚举类应该实现 `XditnModule\Enums\Enum` 接口并使用 `EnumTrait`：
+
+```php
+use XditnModule\Enums\Enum;
+use XditnModule\Enums\EnumTrait;
+
+enum Status: int implements Enum
+{
+    use EnumTrait;
+
+    case Enable = 1;
+    case Disable = 2;
+
+    /**
+     * 获取人类可读的标签（必须实现）
+     */
+    public function label(): string
+    {
+        return match ($this) {
+            self::Enable => '启用',
+            self::Disable => '禁用',
+        };
+    }
+}
+```
+
+### Enum 接口方法说明
+- **`value(): int|string`** - 获取枚举值（由 EnumTrait 提供）
+- **`name(): string`** - 获取枚举名称（由 EnumTrait 提供）
+- **`label(): string`** - 获取人类可读的标签（必须自己实现）
+
+### EnumTrait 提供的静态方法
+- **`options(): array`** - 返回 `[['value' => 1, 'label' => '启用'], ...]` 格式的选项数组
+- **`values(): array`** - 返回所有枚举值的数组 `[1, 2, ...]`
+- **`labels(): array`** - 返回所有标签的数组 `['启用', '禁用', ...]`
+- **`tryFromValue(int|string $value): ?static`** - 尝试从值创建枚举实例
+- **`assert(mixed $value): bool`** - 断言值是否等于枚举值
+
+### 枚举使用示例
+```php
+// 获取选项列表（用于下拉框等）
+$options = Status::options();
+// 结果: [['value' => 1, 'label' => '启用'], ['value' => 2, 'label' => '禁用']]
+
+// 获取单个枚举的值和标签
+$status = Status::Enable;
+$value = $status->value();  // 1
+$label = $status->label();  // '启用'
+$name = $status->name();    // 'Enable'
+
+// 断言
+$status->assert(1);  // true
+$status->assert(2);  // false
+```
+
+## 请求验证规范
+
+### FormRequest 类
+- 所有验证规则定义在 `rules()` 方法中
+- 自定义错误消息定义在 `messages()` 方法中
+- 使用中文错误消息
+
+```php
+public function rules(): array
+{
+    return [
+        'name' => 'required|string|max:255',
+        'email' => 'required|email',
+    ];
+}
+
+public function messages(): array
+{
+    return [
+        'name.required' => '名称必填',
+        'email.email' => '邮箱格式不正确',
+    ];
+}
+```
+
+## 服务类规范
+
+### 服务类命名
+- 服务类使用 `Service` 后缀：`UserService`, `PaymentService`
+- 服务类放在 `modules/*/Services` 目录
+
+### 依赖注入
+- 使用构造函数注入依赖
+- 使用 `readonly` 关键字修饰只读属性
+
+```php
+public function __construct(
+    protected readonly UserRepository $userRepository
+) {}
+```
+
+## 异常处理规范
+
+### 异常消息
+- 管理端异常使用硬编码中文
+- 所有异常键定义在 `lang/{locale}/exception.php`
+
+```php
+throw new FailedException('用户不存在');
+```
+
+## 测试规范
+
+### 测试文件结构
+- **单元测试**：`tests/Unit/` - 测试服务类、模型方法等核心逻辑
+- **功能测试**：`tests/Feature/` - 测试 API 端点
+- **服务类测试**：`tests/Unit/Services/` - 服务类单元测试
+
+### 单元测试要求
+- **核心逻辑必须编写单元测试**：所有服务类（Service）的核心方法必须有单元测试
+- **测试应该能跑通**：所有测试必须能够成功运行，不能有编译错误或运行时错误
+- **测试命名**：使用语义化测试名称，如 `test_create_order()`, `test_handle_callback()`
+- **测试覆盖**：核心业务逻辑（如订单创建、支付回调、金币计算等）必须有完整的测试覆盖
+
+### 测试命名
+- 使用语义化测试名称：`test_admin_get_user_list()`
+- 测试方法使用中文描述：`it('管理员 获取用户列表测试')`
+
+### 测试基类
+- **单元测试**：继承 `Tests\TestCase`
+- 所有测试必须使用 `RefreshDatabase` trait
+
+## 代码格式化
+
+### Laravel Pint
+- 运行格式化：`php vendor/bin/pint`
+- 配置文件：`pint.json`
+- 遵循 PSR-12 标准
+
+### 代码检查
+- 使用 IDE 的代码检查功能
+- 修复所有 linter 警告和错误
+
+## 模块化架构
+
+### XditnModule 模块结构规范
+
+#### 标准模块目录结构
+```
+modules/{ModuleName}/
+├── database/
+│   ├── migrations/          # 数据库迁移文件
+│   └── seeders/            # 数据填充文件
+├── Http/
+│   ├── Controllers/         # 控制器
+│   └── Requests/           # 表单请求验证
+├── Models/                  # 模型
+├── Services/                # 服务类（可选）
+├── Enums/                   # 枚举类（可选）
+├── Exceptions/              # 异常类（可选）
+├── Providers/               # 服务提供者（可选）
+├── routes/
+│   └── route.php           # 模块路由文件
+└── Installer.php           # 模块安装器（可选）
+```
+
+#### 模块命名规范
+- 模块名使用 PascalCase：`VideoSubscription`, `Pay`, `User`
+- 模块目录名与模块名保持一致
+- 模块命名空间：`Modules\{ModuleName}\`
+
+#### 模块路由规范
+- 路由文件位置：`modules/{ModuleName}/routes/route.php`
+- 路由前缀：由 `config/xditn.php` 中的 `route.prefix` 配置（默认 `api`）
+- 路由中间件：由 `config/xditn.php` 中的 `route.middlewares` 配置
+- 模块路由自动加载：由 `config/xditn.php` 中的 `module.autoload` 配置
+
+#### 模块服务提供者规范
+- 服务提供者位置：`modules/{ModuleName}/Providers/{ModuleName}ServiceProvider.php`
+- 命名空间：`Modules\{ModuleName}\Providers`
+- 必须继承 `XditnModule\Providers\XditnModuleModuleServiceProvider`
+- 在 `boot()` 方法中注册路由、事件监听器等
+
+#### 模块安装器规范
+- 安装器位置：`modules/{ModuleName}/Installer.php`
+- 命名空间：`Modules\{ModuleName}`
+- 实现 `XditnModule\Contracts\ModuleInstaller` 接口（可选）
+- 用于模块安装、卸载、更新等操作
+
+#### 模块配置规范
+- 模块配置在 `config/xditn.php` 中的 `module.default` 数组中声明
+- 模块自动加载由 `module.autoload` 配置控制
+- 模块路由集合在 `module.routes` 中定义（可选）
+
+### 命名空间
+- 模块代码：`Modules\{ModuleName}\`
+- 框架代码：`XditnModule\`（XditnModule 框架代码）
+
+## API 文档规范
+
+### Scribe 注释
+- 所有接口必须有完整的 `@responseField` 注释
+- POST/PUT/PATCH 请求必须有 `@bodyParam` 注释
+- GET 请求的查询参数使用 `@queryParam`
+- URL 参数使用 `@urlParam`
+
+### JSON 示例
+- 所有接口自动生成请求和响应 JSON 示例
+- 即使没有 `@responseField` 也会生成基础响应结构
+
+## XditnModule 命令规范
+
+### 迁移相关命令
+- **创建迁移文件**：`php artisan xditn:module:make:migration {模块名} {表名}`
+  - 示例：`php artisan xditn:module:make:migration Pay recharge_activities`
+  - 示例：`php artisan xditn:module:make:migration VideoSubscription videos`
+  - 生成位置：`modules/{模块名}/database/migrations/`
+  - 文件名格式：`YYYY_mm_dd_HHMMSS_{表名}.php`
+
+- **运行迁移**：`php artisan xditn:module:migrate {模块名} {--force}`
+  - 示例：`php artisan xditn:module:migrate Pay`
+  - 运行该模块所有未执行的迁移文件
+  - `--force`：生产环境强制执行
+
+- **重置迁移**：`php artisan xditn:module:migrate:fresh {模块名} {--force}`
+  - 示例：`php artisan xditn:module:migrate:fresh VideoSubscription`
+  - 删除该模块的所有表并重新运行迁移
+
+- **回滚迁移**：`php artisan xditn:module:migrate:rollback {模块名} {--force}`
+  - 示例：`php artisan xditn:module:migrate:rollback VideoSubscription`
+  - 回滚该模块的最后一次迁移
+
+### Seeder 相关命令
+- **创建 Seeder**：`php artisan xditn:module:make:seeder {模块名} {seeder名称}`
+  - 示例：`php artisan xditn:module:make:seeder Pay RechargeActivitiesSeeder`
+  - 生成位置：`modules/{模块名}/database/seeders/`
+
+- **运行 Seeder**：`php artisan xditn:module:db:seed {模块名} {--seeder=}`
+  - 示例：`php artisan xditn:module:db:seed Pay`
+  - 示例：`php artisan xditn:module:db:seed Pay --seeder=RechargeActivitiesSeeder`
+  - 运行指定模块的所有 seeder，或指定 seeder
+
+### 代码生成命令
+- **创建控制器**：`php artisan xditn:module:make:controller {模块名} {控制器名}`
+  - 示例：`php artisan xditn:module:make:controller Pay RechargeActivityController`
+  - 生成位置：`modules/{模块名}/Http/Controllers/`
+
+- **创建模型**：`php artisan xditn:module:make:model {模块名} {模型名} {--t=表名}`
+  - 示例：`php artisan xditn:module:make:model Pay RechargeActivity --t=recharge_activities`
+  - 生成位置：`modules/{模块名}/Models/`
+  - `--t`：指定表名（可选）
+
+- **生成完整 CRUD**：`php artisan xditn:module:make:crud {模块名} {资源名} [选项]`
+  - 示例：`php artisan xditn:module:make:crud Pay RechargeOrder`
+  - 示例：`php artisan xditn:module:make:crud Pay RechargeOrder --t=recharge_orders --subgroup=充值管理`
+  - 选项：
+    - `--t=`：指定数据库表名（可选，默认使用资源名称的 snake_case 形式）
+    - `--subgroup=`：API 文档分组名称（可选）
+    - `--subgroup-description=`：API 文档分组描述（可选）
+  - 生成文件：
+    - `modules/{模块名}/Models/{资源名}.php` - 模型（自动从数据库表结构生成 $fillable）
+    - `modules/{模块名}/Http/Controllers/{资源名}Controller.php` - 控制器（包含完整 API 文档注释）
+    - `modules/{模块名}/Http/Requests/Store{资源名}Request.php` - 创建请求验证
+    - `modules/{模块名}/Http/Requests/Update{资源名}Request.php` - 更新请求验证
+    - `modules/{模块名}/Services/{资源名}Service.php` - 服务类
+    - `tests/Unit/Services/{资源名}ServiceTest.php` - 单元测试模板
+  - 注意事项：
+    - 生成代码前，确保数据库表已经创建
+    - 如果文件已存在，命令会询问是否覆盖
+    - 生成后需要完善 Request 验证规则、Service 业务逻辑和单元测试
+
+### 模块管理命令
+- **安装模块**：`php artisan xditn:module:module:install {--f} {--all}`
+  - `--f`：强制安装，不会删除当前模块的数据库数据
+  - `--all`：安装所有模块
+  - 示例：`php artisan xditn:module:module:install`
+
+- **安装系统**：`php artisan xditn:module:install {--prod} {--docker}`
+  - `--prod`：生产环境安装
+  - `--docker`：Docker 环境安装
+  - 示例：`php artisan xditn:module:install`
+
+### 其他命令
+- **查看版本**：`php artisan xditn:module:version`
+  - 显示 XditnModule 版本号
+
+- **生成 API 文档**：`php artisan xditn:module:api:doc {--config=}`
+  - `--config`：指定配置文件，默认为 `xditn_api_doc`
+  - 示例：`php artisan xditn:module:api:doc`
+
+- **打包项目**：`php artisan xditn:module:build`
+  - 打包后端项目，用于生产部署
+
+- **导出菜单**：`php artisan xditn:module:export:menu {--p} {--module=}`
+  - `--p`：使用树形结构
+  - `--module`：指定导出的模块
+  - 示例：`php artisan xditn:module:export:menu --module=Pay`
+
+- **更新管理员密码**：`php artisan xditn:module:update:password`
+  - 更新超级管理员密码
+
+- **生成增量包**：`php artisan xditn:module:generate:patch {from} {to}`
+  - 示例：`php artisan xditn:module:generate:patch v1.0.0 v1.1.0`
+  - 生成两个版本之间的增量更新包
+
+- **应用增量包**：`php artisan xditn:module:upgrade {zip文件路径}`
+  - 示例：`php artisan xditn:module:upgrade storage/patches/v1.0.0_v1.1.0.zip`
+  - 应用增量升级包并自动校验、备份、回滚
+
+## 数据库规范
+
+### 迁移文件
+- 迁移文件命名：`YYYY_MM_DD_HHMMSS_create_table_name.php`
+- 使用 `Schema` facade 创建表结构
+- 所有表必须有 `created_at` 和 `updated_at` 字段
+- **必须使用 `declare(strict_types=1);` 声明**
+
+#### 迁移文件生成命令
+- **创建迁移文件**：`php artisan xditn:module:make:migration {模块名} {表名}`
+  - 示例：`php artisan xditn:module:make:migration Pay recharge_activities`（为 Pay 模块创建 recharge_activities 表的迁移文件）
+  - 示例：`php artisan xditn:module:make:migration VideoSubscription videos`（为 VideoSubscription 模块创建 videos 表的迁移文件）
+  - 命令会自动生成迁移文件到 `modules/{模块名}/database/migrations/` 目录
+  - 文件名格式：`YYYY_mm_dd_HHMMSS_{表名}.php`
+  - **禁止手动创建迁移文件**，必须使用上述命令生成
+
+#### 迁移文件执行命令
+- **运行迁移**：`php artisan xditn:module:migrate {模块名}`
+  - 示例：`php artisan xditn:module:migrate Pay`（运行 Pay 模块的所有未执行迁移）
+  - 示例：`php artisan xditn:module:migrate VideoSubscription`（运行 VideoSubscription 模块的所有未执行迁移）
+  - 可选参数：`--force`（生产环境强制执行）
+
+- **重置迁移**：`php artisan xditn:module:migrate:fresh {模块名}`
+  - 示例：`php artisan xditn:module:migrate:fresh VideoSubscription`（删除该模块的所有表并重新运行迁移）
+  - 可选参数：`--force`（生产环境强制执行）
+
+- **回滚迁移**：`php artisan xditn:module:migrate:rollback {模块名}`
+  - 示例：`php artisan xditn:module:migrate:rollback VideoSubscription`（回滚该模块的最后一次迁移）
+  - 可选参数：`--force`（生产环境强制执行）
+
+#### 迁移文件合并规范
+- 所有字段的添加、删除、修改操作应统一合并到 `create_table` 类型的迁移文件中
+- 禁止创建单独的 `add_xxx`、`remove_xxx`、`update_xxx` 类型的迁移文件
+- 如果需要对表结构进行调整，应直接修改对应的 `create_table` 迁移文件
+- 在开发阶段，可以手动删除数据库表后重新运行迁移来应用变更
+
+#### 迁移文件模板规范
+- 迁移文件必须包含 `declare(strict_types=1);` 声明
+- `up()` 方法中必须检查表是否存在：`if (Schema::hasTable('table_name')) { return; }`
+- `down()` 方法中必须删除表：`Schema::dropIfExists('table_name');`
+- 使用 `DB::statement()` 创建包含 `deleted_at` 的唯一索引以支持软删除场景
+- **时间字段规范**：
+  - 必须使用 `$table->createdAt()` 和 `$table->updatedAt()` 宏（创建 `unsignedInteger` 类型）
+  - 必须使用 `$table->deletedAt()` 宏（创建 `unsignedInteger` 类型，支持软删除）
+  - 禁止使用 `$table->timestamp('created_at')` 或 `$table->timestamps()`
+  - 业务时间字段（如 `paid_at`, `transaction_at`）可以使用 `$table->timestamp()` 或 `$table->integer()`，根据业务需求决定
+
+### 模型关系
+- 使用 Eloquent 关系方法定义关联
+- 关系方法使用驼峰命名：`belongsTo()`, `hasMany()`
+
+### XditnModule 模型继承规范
+
+#### 模型基类选择
+- **管理端模型**：继承 `XditnModule\Base\XditnModuleModel`
+
+#### XditnModuleModel 特性
+- 自动包含 `BaseOperate`, `DateformatTrait`, `ScopeTrait`, `SoftDeletes`, `Trans`, `WithAttributes` 等 Trait
+- 默认 `$dateFormat = 'U'`（Unix 时间戳）
+- 默认 `$timestamps = false`（关闭 Laravel 自动时间戳，使用 BaseOperate 手动填充）
+- 默认 `$perPage = 10`（分页每页数量）
+- 默认隐藏 `deleted_at` 字段
+
+#### 模型配置示例
+```php
+// ✅ 正确：管理端模型使用 XditnModuleModel
+use XditnModule\Base\XditnModuleModel;
+
+class RechargeActivity extends XditnModuleModel
+{
+    protected $table = 'recharge_activities';
+    
+    // 使用 XditnModule 的默认配置
+    // $dateFormat = 'U'（默认）
+    // $timestamps = false（默认）
+}
+```
+
+### XditnModule 控制器继承规范
+
+#### 控制器基类选择
+- **管理端控制器**：继承 `XditnModule\Base\XditnModuleController`
+
+#### XditnModuleController 特性
+- 提供 `getLoginUser()` 和 `getLoginUserId()` 方法获取当前登录用户
+- 自动处理认证异常
+- 响应格式由框架自动处理（直接返回数组或模型结果）
+
+#### 控制器配置示例
+```php
+// ✅ 正确：管理端控制器
+use XditnModule\Base\XditnModuleController as Controller;
+
+class RechargeActivityController extends Controller
+{
+    public function __construct(
+        protected readonly RechargeActivity $model
+    ) {}
+    
+    public function index(): mixed
+    {
+        return $this->model->getList();
+    }
+}
+```
+
+## Git 提交规范
+
+### 提交信息
+- 使用中文提交信息
+- 格式：`类型: 简短描述`
+- 类型：`feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+
+## XditnModule 框架特性
+
+### XditnModule 时间字段规范（重要）
+
+#### 统一使用 unsignedInteger 类型（推荐）
+**强烈建议统一使用 XditnModule 的 `createdAt()` 和 `updatedAt()` 宏**，原因如下：
+
+1. **符合 XditnModule 框架设计**：
+   - XditnModule 框架默认使用 Unix 时间戳（`unsignedInteger`）
+   - `XditnModuleModel` 默认 `$dateFormat = 'U'`
+   - `BaseOperate` Trait 的 `filterData()` 方法自动使用 `time()` 填充时间戳
+   - `DateformatTrait` 会根据 `config('xditn.module.model.date_format')` 自动格式化输出
+
+2. **性能优势**：
+   - `unsignedInteger` 存储空间更小（4 字节 vs 8 字节）
+   - 时间戳比较和计算更高效
+   - 索引性能更好
+
+3. **兼容性优势**：
+   - 不受时区影响
+   - 便于跨系统数据交换
+   - 便于时间计算（加减天数、小时等）
+
+4. **统一性优势**：
+   - 所有表使用相同的时间字段类型
+   - 模型不需要单独设置 `$dateFormat`
+   - 减少配置错误
+
+#### 迁移文件规范
+- **必须使用** `$table->createdAt()` 和 `$table->updatedAt()` 宏
+- **禁止使用** `$table->timestamp('created_at')` 或 `$table->timestamps()`
+- 其他业务时间字段（如 `paid_at`, `transaction_at`）可以使用 `$table->timestamp()` 或 `$table->integer()`，根据业务需求决定
+
+#### 模型配置规范
+- **使用 XditnModuleModel 且数据库字段是 unsignedInteger**：不需要设置 `$dateFormat`，使用默认值 `'U'`
+- **使用 XditnModuleModel 但数据库字段是 timestamp**：必须设置 `protected $dateFormat = 'Y-m-d H:i:s'`
+- **业务时间字段**：在 `$casts` 中单独处理，如 `'paid_at' => 'datetime:Y-m-d H:i:s'`
+
+#### 正确示例
+```php
+// ✅ 迁移文件：使用 XditnModule 宏
+Schema::create('subscriptions', function (Blueprint $table) {
+    $table->id();
+    // ... 其他字段
+    $table->createdAt();  // 创建 unsignedInteger 类型字段
+    $table->updatedAt();  // 创建 unsignedInteger 类型字段
+    $table->deletedAt();  // 创建 unsignedInteger 类型字段
+});
+
+// ✅ 模型：使用默认配置（不需要设置 $dateFormat）
+class Subscription extends XditnModuleModel
+{
+    protected $table = 'subscriptions';
+    // 不需要设置 $dateFormat，使用默认的 'U'
+    // DateformatTrait 会自动根据 config('xditn.module.model.date_format') 格式化输出
+}
+```
+
+#### 错误示例
+```php
+// ❌ 迁移文件：使用 timestamp() 方法
+Schema::create('subscriptions', function (Blueprint $table) {
+    $table->timestamp('created_at');  // 错误！应该使用 createdAt() 宏
+    $table->timestamp('updated_at');  // 错误！应该使用 updatedAt() 宏
+});
+
+// ❌ 模型：数据库字段是 unsignedInteger，但设置了 datetime 格式
+class Subscription extends XditnModuleModel
+{
+    protected $dateFormat = 'Y-m-d H:i:s';  // 错误！数据库字段是 unsignedInteger
+    // 这会导致时间显示为 1970-01-01 08:00:00
+}
+```
+
+### XditnModuleModel 基础操作
+
+#### 数据操作方法
+- **`storeBy(array $data): mixed`** - 保存数据，自动处理 `fillable` 和 `form` 字段，自动填充创建人、时间戳等
+- **`createBy(array $data): mixed`** - 创建新实例并保存
+- **`updateBy($id, array $data): mixed`** - 更新指定 ID 的数据
+- **`firstBy($value, $field = null, array $columns = ['*']): ?Model`** - 根据字段值查找单条记录
+- **`getList(): mixed`** - 获取列表（支持分页、搜索、排序、数据权限等）
+- **`deleteBy($id, bool $force = false, bool $softForce = false): ?bool`** - 删除记录（支持软删除）
+- **`deletesBy(array|string $ids, bool $force = false, ?Closure $callback = null): bool`** - 批量删除
+- **`restoreBy(array|string $ids): bool|int`** - 恢复软删除的记录
+- **`deleteTrash($id): mixed`** - 永久删除软删除的记录
+- **`toggleBy($id, string $field = 'status'): bool`** - 切换字段状态（如启用/禁用）
+- **`togglesBy(array|string $ids, string $field = 'status'): bool`** - 批量切换状态
+- **`batchUpdate(string $field, array $condition, array $data): bool`** - 批量更新
+
+#### 模型属性配置
+- **`$fillable`** - 可批量赋值的字段
+- **`$fields`** - 列表查询时返回的字段（默认查询字段）
+- **`$form`** - 表单提交时允许的字段（与 `$fillable` 合并）
+- **`$searchable`** - 快速搜索字段配置，格式：`['field' => 'like|=']`
+- **`$perPage`** - 分页每页数量（默认 10）
+- **`$isPaginate`** - 是否启用分页（默认 true）
+- **`$asTree`** - 是否返回树形结构（默认 false）
+- **`$sortField`** - 默认排序字段
+- **`$sortDesc`** - 是否降序排序（默认 true）
+- **`$parentIdColumn`** - 父级 ID 字段名（默认 'parent_id'）
+- **`$formRelations`** - 表单关联关系字段（用于自动处理关联数据）
+- **`$syncParentFields`** - 与父级同步更新的字段（默认 ['status']）
+- **`$dataRange`** - 是否启用数据权限范围（默认 false）
+- **`$columnAccess`** - 是否启用字段访问控制（默认 false）
+- **`$autoNull2EmptyString`** - 是否自动将 null 转换为空字符串（默认 true）
+- **`$isFillCreatorId`** - 是否自动填充创建人 ID（默认 true）
+
+#### 链式方法
+- **`setBeforeGetList(Closure $closure): static`** - 设置列表查询前的回调
+- **`setAfterFirstBy(Closure $closure): static`** - 设置查询单条记录后的回调
+- **`setSearchable(array $searchable): static`** - 设置可搜索字段
+- **`setQuickSearchCallback(Closure $callback): static`** - 设置快速搜索回调
+- **`setPaginate(bool $isPaginate = true): static`** - 设置是否分页
+- **`disablePaginate(): static`** - 禁用分页
+- **`asTree(): static`** - 启用树形结构
+- **`setDataRange(bool $use = true): static`** - 启用/禁用数据权限范围
+- **`setColumnAccess(bool $use = true): static`** - 启用/禁用字段访问控制
+- **`setAutoNull2EmptyString(bool $auto = true): static`** - 设置是否自动转换 null
+- **`fillCreatorId(bool $is = true): static`** - 设置是否自动填充创建人
+- **`withoutForm(): static`** - 忽略 form 字段限制
+- **`setSyncParentFields(?array $fields = []): static`** - 设置同步父级字段
+
+#### 事务方法（Trans Trait）
+- **`beginTransaction(): void`** - 开始事务
+- **`commit(): void`** - 提交事务
+- **`rollback(): void`** - 回滚事务
+- **`transaction(Closure $closure): mixed`** - 执行事务闭包
+
+#### 时间格式化（DateformatTrait）
+- **`setTimeFormat(string $timeFormat): static`** - 设置时间格式（默认 'Y-m-d H:i:s'）
+- **`dateFormatCasts(): array`** - 获取日期字段的 casts 配置
+
+#### 查询作用域（ScopeTrait）
+- **`scopeCreator($query): void`** - 自动关联创建人信息（需要在 `$fillable` 中包含 `creator_id`）
+
+#### 关联关系处理（WithRelations Trait）
+- 自动处理 `$formRelations` 中定义的关联关系
+- 支持 `BelongsToMany`、`HasMany`、`HasOne` 等关联类型
+- 创建时自动创建关联数据，更新时自动同步关联数据，删除时自动清理关联数据
+
+### XditnModuleController 基础方法
+
+#### 用户认证方法
+- **`getLoginUser(?string $guard = null, ?string $field = null): mixed`** - 获取当前登录用户（可指定字段）
+- **`getLoginUserId($guard = null): mixed`** - 获取当前登录用户 ID
+
+### autoNull2EmptyString 属性详解
+
+- XditnModule 的 `XditnModuleModel` 默认会将 `null` 值转换为空字符串 `''`（通过 `autoNull2EmptyString = true`）
+- 对于需要保持 `null` 值的字段（如 `decimal`、`float` 等数据库字段），必须在模型中设置 `protected bool $autoNull2EmptyString = false;`
+- 这样可以避免数据库报错：`Incorrect decimal value: '' for column 'xxx' at row 1`
+
+**正确示例：**
+```php
+class RechargeActivity extends XditnModuleModel
+{
+    protected $table = 'recharge_activities';
+    
+    /**
+     * 禁用自动将 null 转换为空字符串
+     * 对于 decimal 等字段，需要保持 null 值而不是空字符串
+     */
+    protected bool $autoNull2EmptyString = false;
+    
+    // ...
+}
+```
+
+**注意事项：**
+- 不要在控制器中手动处理空字符串转 null 的逻辑
+- XditnModule 的 `filterData()` 方法已经处理了数据过滤
+- 如果模型需要保持 `null` 值，只需在模型中设置 `$autoNull2EmptyString = false`
+
+### 使用示例
+
+#### 控制器中使用 XditnModuleModel
+```php
+class RechargeActivityController extends Controller
+{
+    public function __construct(
+        protected readonly RechargeActivity $model
+    ) {}
+
+    // 列表查询（自动支持搜索、分页、排序）
+    public function index(): mixed
+    {
+        return $this->model->getList();
+    }
+
+    // 列表查询（带关联数据）
+    public function indexWithRelations(): mixed
+    {
+        return $this->model->setBeforeGetList(function ($query) {
+            return $query->with('user');
+        })->getList();
+    }
+
+    // 保存数据
+    public function store(): mixed
+    {
+        return $this->model->storeBy(request()->all());
+    }
+
+    // 更新数据
+    public function update($id): mixed
+    {
+        return $this->model->updateBy($id, request()->all());
+    }
+
+    // 查询单条
+    public function show($id): mixed
+    {
+        return $this->model->firstBy($id);
+    }
+
+    // 删除
+    public function destroy($id): mixed
+    {
+        return $this->model->deleteBy($id);
+    }
+
+    // 启用/禁用
+    public function enable($id): mixed
+    {
+        return $this->model->toggleBy($id);
+    }
+}
+```
+
+#### 模型配置示例
+```php
+class RechargeActivity extends XditnModuleModel
+{
+    protected $table = 'recharge_activities';
+    
+    // 可批量赋值字段（不包含时间戳）
+    protected $fillable = ['id', 'title', 'description', 'type', 'status'];
+    
+    // 列表查询字段（可包含时间戳）
+    protected array $fields = ['id', 'title', 'type', 'status', 'created_at'];
+    
+    // 表单提交字段
+    protected array $form = ['title', 'description', 'type', 'status'];
+    
+    // 可搜索字段
+    public array $searchable = [
+        'title' => 'like',  // 模糊搜索
+        'type' => '=',      // 精确搜索
+        'status' => '=',
+    ];
+    
+    // 禁用 null 转空字符串
+    protected bool $autoNull2EmptyString = false;
+    
+    // 禁用分页
+    // protected bool $isPaginate = false;
+    
+    // 启用树形结构
+    // protected bool $asTree = true;
+}
+```
+
+## 事件系统规范
+
+### 统一事件接口（Event）
+所有事件类应该实现 `XditnModule\Contracts\Event` 接口并使用 `EventTrait`：
+
+```php
+use XditnModule\Contracts\Event;
+use XditnModule\Traits\EventTrait;
+
+class OrderCreatedEvent implements Event
+{
+    use EventTrait;
+
+    public function __construct(
+        public readonly Order $order
+    ) {
+        $this->initializeEventTrait();
+    }
+
+    public function getData(): array
+    {
+        return [
+            'order_id' => $this->order->id,
+            'amount' => $this->order->amount,
+        ];
+    }
+
+    public function shouldBroadcast(): bool
+    {
+        return true;
+    }
+
+    public function broadcastChannel(): string
+    {
+        return 'orders.' . $this->order->user_id;
+    }
+}
+```
+
+### Event 接口方法说明
+- **`getData(): array`** - 获取事件数据（用于日志记录、序列化）
+- **`shouldBroadcast(): bool`** - 是否广播此事件
+- **`shouldQueue(): bool`** - 是否异步处理
+- **`getEventName(): string`** - 获取事件名称
+- **`getOccurredAt(): DateTimeInterface`** - 获取事件发生时间
+
+### EventTrait 提供的方法
+- **`setBroadcast(bool $broadcast): static`** - 设置是否广播
+- **`setQueue(bool $queue): static`** - 设置是否异步
+- **`toArray(): array`** - 转换为数组（用于日志记录）
+
+### 事件订阅者（EventSubscriber）
+使用事件订阅者在一个类中处理多个相关事件：
+
+```php
+use XditnModule\Contracts\EventSubscriber;
+use Illuminate\Events\Dispatcher;
+
+class OrderEventSubscriber implements EventSubscriber
+{
+    public function subscribe(Dispatcher $events): array
+    {
+        return [
+            OrderCreatedEvent::class => 'handleOrderCreated',
+            OrderPaidEvent::class => 'handleOrderPaid',
+            OrderCancelledEvent::class => 'handleOrderCancelled',
+        ];
+    }
+
+    public function handleOrderCreated(OrderCreatedEvent $event): void
+    {
+        // 处理订单创建事件
+    }
+
+    public function handleOrderPaid(OrderPaidEvent $event): void
+    {
+        // 处理订单支付事件
+    }
+}
+```
+
+**注册订阅者（在 ServiceProvider 中）：**
+```php
+Event::subscribe(OrderEventSubscriber::class);
+```
+
+## 查询过滤器（Filter）规范
+
+### Filter 模式简介
+Filter 模式用于封装复杂的查询逻辑，使查询条件可复用、可测试。
+
+### 内置过滤器
+- **`StatusFilter`** - 状态过滤器
+- **`DateRangeFilter`** - 日期范围过滤器
+- **`SearchFilter`** - 多字段搜索过滤器
+- **`InFilter`** - IN 查询过滤器
+
+### 使用方法
+
+**1. 在模型中配置过滤器：**
+```php
+use XditnModule\Traits\DB\HasFilters;
+use XditnModule\Support\Query\Filters\StatusFilter;
+use XditnModule\Support\Query\Filters\DateRangeFilter;
+use XditnModule\Support\Query\Filters\SearchFilter;
+
+class Order extends XditnModuleModel
+{
+    use HasFilters;
+
+    // 方式一：使用过滤器类名（自动实例化）
+    protected array $filters = [
+        'status' => StatusFilter::class,
+        'date_range' => DateRangeFilter::class,
+    ];
+
+    // 方式二：在 boot 方法中配置（支持构造参数）
+    protected static function booted()
+    {
+        static::addFilter('keyword', new SearchFilter(['name', 'phone', 'email']));
+        static::addFilter('created_at', new DateRangeFilter('created_at'));
+    }
+}
+```
+
+**2. 使用过滤器查询：**
+```php
+// 手动传入过滤条件
+Order::filter([
+    'status' => 1,
+    'keyword' => '张三',
+    'date_range' => ['2024-01-01', '2024-12-31'],
+])->get();
+
+// 从请求中自动获取过滤条件
+Order::filterFromRequest()->get();
+```
+
+### 自定义过滤器
+```php
+use XditnModule\Support\Query\Filter;
+use Illuminate\Database\Eloquent\Builder;
+
+class AmountRangeFilter extends Filter
+{
+    public function __construct(
+        protected string $column = 'amount'
+    ) {}
+
+    public function apply(Builder $builder, mixed $value): Builder
+    {
+        if (!is_array($value)) {
+            return $builder;
+        }
+
+        $min = $value['min'] ?? $value[0] ?? null;
+        $max = $value['max'] ?? $value[1] ?? null;
+
+        if ($min !== null) {
+            $builder->where($this->column, '>=', $min);
+        }
+
+        if ($max !== null) {
+            $builder->where($this->column, '<=', $max);
+        }
+
+        return $builder;
+    }
+
+    public function isValid(mixed $value): bool
+    {
+        return is_array($value) && (isset($value['min']) || isset($value['max']) || count($value) >= 1);
+    }
+}
+```
+
+## API 版本控制规范
+
+### 配置
+在 `config/xditn.php` 中配置：
+```php
+'route' => [
+    'prefix' => 'api',
+    'middlewares' => [...],
+
+    // API 版本控制
+    'version' => env('XDITN_API_VERSION', 'v1'),
+    'supported_versions' => ['v1', 'v2'],
+    'version_header' => 'X-API-Version',
+],
+```
+
+### 版本解析优先级
+1. URL 路径版本：`/api/v1/users`
+2. 自定义 Header：`X-API-Version: 1`
+3. Accept Header：`Accept: application/vnd.api+json;version=1`
+4. 默认版本（配置值）
+
+### 使用方法
+
+**1. 注册版本化路由：**
+```php
+use XditnModule\Support\ApiVersion;
+
+// 使用助手类
+ApiVersion::routes('v1', function () {
+    Route::get('users', [UserController::class, 'index']);
+});
+
+ApiVersion::routes('v2', function () {
+    Route::get('users', [UserV2Controller::class, 'index']);
+});
+```
+
+**2. 在控制器中获取版本：**
+```php
+public function index(): mixed
+{
+    $version = ApiVersion::current(); // 'v1'
+    $versionNumber = ApiVersion::currentNumber(); // 1
+
+    // 或从请求中获取
+    $version = request()->attributes->get('api_version');
+}
+```
+
+**3. 版本比较：**
+```php
+use XditnModule\Support\ApiVersion;
+
+if (ApiVersion::is('v1')) {
+    // v1 版本逻辑
+}
+
+if (ApiVersion::gte('v2')) {
+    // v2 及以上版本逻辑
+}
+
+if (ApiVersion::lt('v3')) {
+    // v3 以下版本逻辑
+}
+```
+
+**4. 根据版本执行不同逻辑：**
+```php
+$result = ApiVersion::match([
+    'v1' => fn () => $this->getListV1(),
+    'v2' => fn () => $this->getListV2(),
+], fn () => $this->getListDefault());
+```
+
+### ApiVersion 类方法
+- **`current(): string`** - 获取当前版本（如 'v1'）
+- **`currentNumber(): int`** - 获取当前版本号（如 1）
+- **`is(string $version): bool`** - 检查是否等于指定版本
+- **`gt(string $version): bool`** - 检查是否大于指定版本
+- **`gte(string $version): bool`** - 检查是否大于等于指定版本
+- **`lt(string $version): bool`** - 检查是否小于指定版本
+- **`lte(string $version): bool`** - 检查是否小于等于指定版本
+- **`default(): string`** - 获取默认版本
+- **`supported(): array`** - 获取所有支持的版本
+- **`isSupported(string $version): bool`** - 检查版本是否被支持
+- **`routes(string $version, callable $routes, array $options = []): void`** - 注册版本化路由
+- **`match(array $handlers, ?callable $default = null): mixed`** - 根据版本执行不同逻辑
+
+## 请求速率限制规范
+
+### 配置
+在 `config/xditn.php` 中配置：
+```php
+'rate_limit' => [
+    'enabled' => true,
+    'max_attempts' => 60, // 每分钟最大请求次数
+    'decay_minutes' => 1, // 时间窗口（分钟）
+],
+```
+
+### 使用中间件
+```php
+use XditnModule\Middleware\RateLimitMiddleware;
+
+// 在路由中使用
+Route::middleware(RateLimitMiddleware::class)->group(function () {
+    Route::get('users', [UserController::class, 'index']);
+});
+
+// 自定义限制参数（100次/5分钟）
+Route::middleware('rate_limit:100,5')->group(function () {
+    // ...
+});
+```
+
+### 响应头
+- `X-RateLimit-Limit` - 最大请求次数
+- `X-RateLimit-Remaining` - 剩余请求次数
+
+## 请求追踪规范
+
+### 配置
+```php
+'tracing' => [
+    'enabled' => true,
+    'header' => 'X-Trace-Id',
+    'log_requests' => false,
+],
+```
+
+### 使用中间件
+```php
+use XditnModule\Middleware\RequestTracingMiddleware;
+
+Route::middleware(RequestTracingMiddleware::class)->group(function () {
+    // ...
+});
+```
+
+### 获取追踪 ID
+```php
+// 从请求属性获取
+$traceId = request()->attributes->get('trace_id');
+
+// 从 Context 获取（Laravel 11+）
+use Illuminate\Support\Facades\Context;
+$traceId = Context::get('trace_id');
+```
+
+## 健康检查端点
+
+### 注册路由
+```php
+use XditnModule\Http\Controllers\HealthController;
+
+Route::get('health', [HealthController::class, 'index']);
+Route::get('health/ready', [HealthController::class, 'ready']);
+Route::get('health/live', [HealthController::class, 'live']);
+```
+
+### 响应格式
+```json
+{
+    "status": "healthy",
+    "timestamp": "2024-01-01T00:00:00Z",
+    "checks": {
+        "database": { "status": "ok", "latency_ms": 5.2 },
+        "redis": { "status": "ok", "latency_ms": 1.1 },
+        "cache": { "status": "ok", "latency_ms": 2.3 },
+        "queue": { "status": "ok" },
+        "storage": { "status": "ok" }
+    },
+    "version": "1.0.0",
+    "environment": "production"
+}
+```
+
+## 异常处理规范
+
+### 异常类型
+- **`ValidationException`** - 验证失败（HTTP 422）
+- **`AuthenticationException`** - 认证失败（HTTP 401）
+- **`AuthorizationException`** - 授权失败（HTTP 403）
+- **`ResourceNotFoundException`** - 资源不存在（HTTP 404）
+- **`BusinessException`** - 业务异常（HTTP 400）
+- **`RateLimitException`** - 限流异常（HTTP 429）
+- **`ServiceUnavailableException`** - 服务不可用（HTTP 503）
+
+### 使用示例
+```php
+use XditnModule\Exceptions\ValidationException;
+use XditnModule\Exceptions\ResourceNotFoundException;
+use XditnModule\Exceptions\BusinessException;
+
+// 验证异常
+throw new ValidationException('验证失败', ['email' => '邮箱格式不正确']);
+
+// 资源不存在
+throw new ResourceNotFoundException('用户不存在', 'User', $userId);
+
+// 业务异常
+throw new BusinessException('余额不足', ['required' => 100, 'current' => 50]);
+```
+
+## 响应压缩规范
+
+### 配置
+```php
+'compression' => [
+    'enabled' => false,
+    'min_size' => 1024, // 最小压缩大小（字节）
+    'level' => 6, // 压缩级别 1-9
+],
+```
+
+### 使用中间件
+```php
+use XditnModule\Middleware\CompressResponseMiddleware;
+
+Route::middleware(CompressResponseMiddleware::class)->group(function () {
+    // ...
+});
+```
+
+## 注意事项
+
+1. **不要使用** `trans()`，统一使用 `__()` 进行多语言转换
+2. **不要使用** `$guarded = []`，明确声明 `$fillable`
+3. **必须添加** 完整的 Scribe 文档注释
+4. **必须使用** `declare(strict_types=1);`
+5. **必须运行** `php vendor/bin/pint` 格式化代码
+6. **必须修复** 所有 linter 警告和错误
+7. **对于 nullable 的 decimal/float 字段**，必须在模型中设置 `protected bool $autoNull2EmptyString = false;`
+8. **控制器必须保持简洁**：使用 FormRequest 进行验证，避免在控制器中进行复杂判断
+9. **类型安全**：确保所有方法调用的参数类型与方法签名一致
+10. **核心逻辑必须有单元测试**：所有服务类的核心方法必须有测试，且测试必须能跑通
+11. **时间戳字段禁止放入 $fillable**：时间戳由框架自动管理，放入 $fillable 可能导致异常
+
+## 示例代码
+
+### 完整的控制器示例
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Pay\Http\Controllers;
+
+use Modules\Pay\Models\RechargeActivity;
+use XditnModule\Base\XditnModuleController as Controller;
+
+/**
+ * @group 管理端
+ *
+ * @subgroup 充值活动管理
+ *
+ * @subgroupDescription 充值活动相关接口
+ */
+class RechargeActivityController extends Controller
+{
+    public function __construct(
+        protected readonly RechargeActivity $model
+    ) {}
+
+    /**
+     * 获取充值活动列表
+     *
+     * @queryParam page int 页码
+     * @queryParam limit int 每页数量
+     *
+     * @responseField code int 状态码
+     * @responseField message string 提示信息
+     * @responseField page int 当前页
+     * @responseField total int 总数
+     * @responseField limit int 每页数量
+     * @responseField data object[] 活动列表
+     * @responseField data[].id int 活动ID
+     * @responseField data[].title string 活动标题
+     *
+     * @return mixed
+     */
+    public function index(): mixed
+    {
+        return $this->model->getList();
+    }
+}
+```

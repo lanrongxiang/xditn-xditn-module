@@ -1,0 +1,30 @@
+<?php
+
+namespace Modules\Common\Repository\Options;
+
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use XditnModule\XditnModule;
+
+class Controllers implements OptionInterface
+{
+    public function get(): array|Collection
+    {
+        $controllers = [];
+
+        if ($module = request()->get('module')) {
+            $controllerFiles = File::glob(XditnModule::getModuleControllerPath($module).'*.php');
+
+            foreach ($controllerFiles as $controllerFile) {
+                $controllers[] = [
+                    'label' => Str::of(File::name($controllerFile))->lcfirst()->remove('Controller'),
+
+                    'value' => Str::of(File::name($controllerFile))->lcfirst()->remove('Controller'),
+                ];
+            }
+        }
+
+        return $controllers;
+    }
+}

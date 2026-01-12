@@ -1,0 +1,115 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {namespace};
+
+use XditnModule\Base\XditnModuleController;
+use {requestNamespace}\{storeRequest};
+use {requestNamespace}\{updateRequest};
+use Illuminate\Http\Request;
+
+/**
+ * @group 管理端
+ *
+ * @subgroup {subgroup}
+ *
+ * @subgroupDescription {subgroupDescription}
+ */
+class {controller} extends XditnModuleController
+{
+    public function __construct(
+        protected readonly {model} $model
+    ) {}
+
+    /**
+     * 获取列表
+     *
+     * @queryParam page int 页码
+     * @queryParam limit int 每页数量
+     *
+     * @responseField code int 状态码
+     * @responseField message string 提示信息
+     * @responseField data object 响应数据
+     * @responseField data.page int 当前页
+     * @responseField data.total int 总数
+     * @responseField data.limit int 每页数量
+     * @responseField data.list object[] 数据列表
+     *
+     * @param Request $request
+     * @return mixed
+     */
+    public function index(Request $request): mixed
+    {
+        return $this->model->getList();
+    }
+
+    /**
+     * 创建
+     *
+     * @bodyParam field string required 字段说明
+     *
+     * @responseField code int 状态码
+     * @responseField message string 提示信息
+     * @responseField data object 响应数据
+     *
+     * @param {storeRequest} $request
+     * @return mixed
+     */
+    public function store({storeRequest} $request): mixed
+    {
+        return $this->model->storeBy($request->validated());
+    }
+
+    /**
+     * 详情
+     *
+     * @urlParam id int required 记录ID
+     *
+     * @responseField code int 状态码
+     * @responseField message string 提示信息
+     * @responseField data object 响应数据
+     *
+     * @param int $id
+     * @return mixed
+     */
+    public function show(int $id): mixed
+    {
+        return $this->model->firstBy($id);
+    }
+
+    /**
+     * 更新
+     *
+     * @urlParam id int required 记录ID
+     * @bodyParam field string 字段说明
+     *
+     * @responseField code int 状态码
+     * @responseField message string 提示信息
+     * @responseField data object 响应数据
+     *
+     * @param int $id
+     * @param {updateRequest} $request
+     * @return mixed
+     */
+    public function update(int $id, {updateRequest} $request): mixed
+    {
+        return $this->model->updateBy($id, $request->validated());
+    }
+
+    /**
+     * 删除
+     *
+     * @urlParam id int required 记录ID
+     *
+     * @responseField code int 状态码
+     * @responseField message string 提示信息
+     *
+     * @param int $id
+     * @return mixed
+     */
+    public function destroy(int $id): mixed
+    {
+        return $this->model->deleteBy($id);
+    }
+}

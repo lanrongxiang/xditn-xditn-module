@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {namespace};
+
+use XditnModule\Base\XditnModuleModel as Model;
+
+class {model} extends Model
+{
+    protected $table = '{table}';
+
+    protected $fillable = [
+        {fillable}
+    ];
+}
+

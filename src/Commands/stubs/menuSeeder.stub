@@ -1,0 +1,24 @@
+<?php
+
+use Illuminate\Database\Seeder;
+use Modules\Common\Support\ImportPermissions;
+
+return new class extends Seeder
+{
+    /**
+     * Run the seeder.
+     *
+     * @return void
+     */
+    public function run(): void
+    {
+        $menus = $this->menus();
+
+        ImportPermissions::import($menus);
+    }
+
+    public function menus(): array
+    {
+        {menus}
+    }
+};

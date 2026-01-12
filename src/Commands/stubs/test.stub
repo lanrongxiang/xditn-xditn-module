@@ -1,0 +1,60 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {namespace};
+
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use {modelNamespace}\{model};
+
+class {test} extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * Test get list of {modelVar}
+     */
+    public function test_get_list(): void
+    {
+        // TODO: 实现测试
+        $this->assertTrue(true);
+    }
+
+    /**
+     * Test get single {modelVar} by ID
+     */
+    public function test_get_by_id(): void
+    {
+        // TODO: 实现测试
+        $this->assertTrue(true);
+    }
+
+    /**
+     * Test create new {modelVar}
+     */
+    public function test_create(): void
+    {
+        // TODO: 实现测试
+        $this->assertTrue(true);
+    }
+
+    /**
+     * Test update {modelVar}
+     */
+    public function test_update(): void
+    {
+        // TODO: 实现测试
+        $this->assertTrue(true);
+    }
+
+    /**
+     * Test delete {modelVar}
+     */
+    public function test_delete(): void
+    {
+        // TODO: 实现测试
+        $this->assertTrue(true);
+    }
+}
+

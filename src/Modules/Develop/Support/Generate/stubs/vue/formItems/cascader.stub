@@ -1,0 +1,4 @@
+级联选择器
+<el-form-item label="{label}" prop="{prop}" {rule}>
+  <el-cascader v-model="{model-value}" :options="[]" />
+</el-form-item>
