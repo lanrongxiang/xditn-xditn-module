@@ -11,8 +11,8 @@ class SchemaFiles extends Model
     protected $table = 'schema_files';
 
     protected $fillable = [
-        'id', 'schema_id', 'controller_file', 'model_file', 'request_file', 'table_file', 'form_file', 'created_at', 'updated_at', 'deleted_at',
-        'controller_path', 'model_path', 'request_path', 'table_path', 'form_path',
+        'id', 'schema_id', 'controller_file', 'model_file', 'request_file', 'created_at', 'updated_at', 'deleted_at',
+        'controller_path', 'model_path', 'request_path', 'dynamic_path', 'dynamic_file',
     ];
 
     protected bool $autoNull2EmptyString = false;
@@ -38,27 +38,15 @@ class SchemaFiles extends Model
         );
     }
 
-    protected function tablePath(): Attribute
+    protected function dynamicPath(): Attribute
     {
         return Attribute::make(
-            set: fn ($value) => $this->removeWebPath($value)
-        );
-    }
-
-    protected function formPath(): Attribute
-    {
-        return Attribute::make(
-            set: fn ($value) => $this->removeWebPath($value)
+            set: fn ($value) => $this->removeBasePath($value)
         );
     }
 
     protected function removeBasePath($path)
     {
         return Str::of($path)->replace(base_path(), '')->replace('\\', '/');
-    }
-
-    protected function removeWebPath($path)
-    {
-        return Str::of($path)->replace(base_path('web'.DIRECTORY_SEPARATOR.'src'), '')->replace('\\', '/');
     }
 }

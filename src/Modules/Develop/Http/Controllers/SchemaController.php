@@ -140,13 +140,11 @@ class SchemaController extends CatchController
      * @responseField controller_file string 控制器文件
      * @responseField model_file string 模型文件
      * @responseField request_file string 请求文件
-     * @responseField table_file string 前端列表页文件
-     * @responseField form_file string 前端表单文件
+     * @responseField dynamic_file string 动态表单文件
      * @responseField controller_path string 控制器文件路径
      * @responseField model_path string 模型文件路径
      * @responseField request_path string 请求文件路径
-     * @responseField table_path string 前端列表页文件路径
-     * @responseField form_path string 前端表单文件路径
+     * @responseField dynamic_path string 动态表单文件路径
      *
      * @return bool|null
      */
@@ -157,8 +155,8 @@ class SchemaController extends CatchController
         }
 
         return $schemaFiles->where('schema_id', $id)->first([
-            'controller_file', 'model_file', 'request_file', 'table_file', 'form_file',
-            'controller_path', 'model_path', 'request_path', 'table_path', 'form_path',
+            'controller_file', 'model_file', 'request_file', 'dynamic_file',
+            'controller_path', 'model_path', 'request_path', 'dynamic_path',
         ]);
     }
 }

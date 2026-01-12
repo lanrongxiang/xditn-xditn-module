@@ -31,8 +31,6 @@ class InstallCommand extends XditnModuleCommand
 
     /**
      * 默认链接 [mysql, pgsql].
-     *
-     * @var string
      */
     protected string $defaultConnection;
 
@@ -61,7 +59,7 @@ class InstallCommand extends XditnModuleCommand
             // 捕捉退出信号
             if (extension_loaded('pcntl')) {
                 $this->trap([SIGTERM, SIGQUIT, SIGINT], function () {
-                    if (!$this->isFinished) {
+                    if (! $this->isFinished) {
                         $this->rollback();
                     }
 
@@ -71,7 +69,7 @@ class InstallCommand extends XditnModuleCommand
 
             try {
                 // 如果没有 .env 文件
-                if (!File::exists(app()->environmentFile())) {
+                if (! File::exists(app()->environmentFile())) {
                     $this->askForCreatingDatabase();
                 }
 
@@ -86,14 +84,11 @@ class InstallCommand extends XditnModuleCommand
         }
     }
 
-    /**
-     * @return void
-     */
     protected function runningInDocker(): void
     {
         try {
             // 复制一个 .env 文件
-            if (!File::exists(app()->environmentFilePath())) {
+            if (! File::exists(app()->environmentFilePath())) {
                 File::copy(app()->environmentFilePath().'.example', app()->environmentFilePath());
             }
 
@@ -114,9 +109,6 @@ class InstallCommand extends XditnModuleCommand
         }
     }
 
-    /**
-     * @return void
-     */
     private function createStorageLink(): void
     {
         command('storage:link');
@@ -146,7 +138,7 @@ class InstallCommand extends XditnModuleCommand
 
         $unLoadedExtensions = [];
         foreach ($this->defaultExtensions as $extension) {
-            if (!$loadedExtensions->contains($extension)) {
+            if (! $loadedExtensions->contains($extension)) {
                 $unLoadedExtensions[] = $extension;
             }
         }
@@ -173,19 +165,19 @@ class InstallCommand extends XditnModuleCommand
      */
     protected function checkDependenciesTools(): void
     {
-        $executeFinder = new ExecutableFinder();
+        $executeFinder = new ExecutableFinder;
         $composer = $executeFinder->find('composer');
         $git = $executeFinder->find('git');
-        if (!$git) {
+        if (! $git) {
             $this->error('Git 未安装');
             exit;
         }
-        if (!$composer) {
+        if (! $composer) {
             $this->error('Composer 未安装');
             exit;
         }
 
-        if (!function_exists('exec')) {
+        if (! function_exists('exec')) {
             $this->error('exec 函数未开启，请开启 exec 函数');
             exit;
         }
@@ -215,7 +207,7 @@ class InstallCommand extends XditnModuleCommand
                 exit;
             }
 
-            if (!$connection->getDatabaseName()) {
+            if (! $connection->getDatabaseName()) {
                 app(ConnectionFactory::class)->make($databaseConfig)->select(sprintf("create database if not exists $databaseName default charset %s collate %s", 'utf8mb4', 'utf8mb4_general_ci'));
             }
         } else {
@@ -235,7 +227,7 @@ class InstallCommand extends XditnModuleCommand
                 exit;
             }
 
-            if (!$connection->getDatabaseName()) {
+            if (! $connection->getDatabaseName()) {
                 app(ConnectionFactory::class)->make($databaseConfig)
                     ->select(sprintf("create database $databaseName WITH ENCODING = '%s' LC_COLLATE = 'en_US.UTF-8' LC_CTYPE = 'en_US.UTF-8' TEMPLATE = template0;", 'UTF-8'));
             }
@@ -247,11 +239,11 @@ class InstallCommand extends XditnModuleCommand
      */
     protected function copyEnvFile(): void
     {
-        if (!File::exists(app()->environmentFilePath())) {
+        if (! File::exists(app()->environmentFilePath())) {
             File::copy(app()->environmentFilePath().'.example', app()->environmentFilePath());
         }
 
-        if (!File::exists(app()->environmentFilePath())) {
+        if (! File::exists(app()->environmentFilePath())) {
             $this->error('【.env】创建失败, 请重新尝试或者手动创建！');
         }
 
@@ -346,7 +338,7 @@ class InstallCommand extends XditnModuleCommand
             default: 'mysql',
         );
 
-        if ($this->defaultConnection == 'pgsql' && !extension_loaded('pdo_pgsql')) {
+        if ($this->defaultConnection == 'pgsql' && ! extension_loaded('pdo_pgsql')) {
             $this->error('请先安装 pdo_pgsql 扩展');
             exit;
         }
@@ -509,7 +501,7 @@ class InstallCommand extends XditnModuleCommand
                 'DB_PASSWORD' => $dbPassword,
                 'DB_PREFIX' => $prefix,
             ] as $key => $newValue) {
-                if (Str::contains($value, $key) && !Str::contains($value, 'VITE_')) {
+                if (Str::contains($value, $key) && ! Str::contains($value, 'VITE_')) {
                     $value = $this->resetEnvValue($value, $newValue);
                 }
             }
@@ -545,7 +537,7 @@ class InstallCommand extends XditnModuleCommand
      */
     protected function isShouldPublishSanctum(): bool
     {
-        return !($this->isPersonalTokenTableExist() && $this->isHasSanctumConfig());
+        return ! ($this->isPersonalTokenTableExist() && $this->isHasSanctumConfig());
     }
 
     protected function isPersonalTokenTableExist(): bool
@@ -566,8 +558,6 @@ class InstallCommand extends XditnModuleCommand
 
     /**
      * 是否运行在 docker 内.
-     *
-     * @return bool
      */
     protected function isRunningInDocker(): bool
     {
@@ -585,7 +575,7 @@ class InstallCommand extends XditnModuleCommand
 
         // 从命令行参数获取指定模块
         $specifiedModules = $this->option('modules');
-        if (!empty($specifiedModules) && is_array($specifiedModules)) {
+        if (! empty($specifiedModules) && is_array($specifiedModules)) {
             foreach ($specifiedModules as $module) {
                 $modules[] = ucfirst(strtolower($module));
             }
@@ -597,7 +587,7 @@ class InstallCommand extends XditnModuleCommand
             foreach ($defaultModules as $module) {
                 $moduleName = ucfirst(strtolower($module));
                 // 避免重复添加
-                if (!in_array($moduleName, $modules, true)) {
+                if (! in_array($moduleName, $modules, true)) {
                     $modules[] = $moduleName;
                 }
             }

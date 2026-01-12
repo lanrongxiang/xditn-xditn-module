@@ -48,18 +48,6 @@ class Terminal
     }
 
     /**
-     * 在前端目录执行.
-     *
-     * @param callable|null $callback
-     *
-     * @return ProcessResult|\Illuminate\Process\ProcessResult
-     */
-    public function runInWeb(?callable $callback = null): \Illuminate\Process\ProcessResult|ProcessResult
-    {
-        return $this->setCwd(base_path('web'))->run($callback);
-    }
-
-    /**
      * 设置执行目录.
      *
      * @param string $cwd

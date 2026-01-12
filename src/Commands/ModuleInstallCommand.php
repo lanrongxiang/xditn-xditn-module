@@ -8,7 +8,7 @@ use XditnModule\XditnModule;
 
 class ModuleInstallCommand extends XditnModuleCommand
 {
-    protected $signature = 'xditn:module:install {--f : 强制安装} {--all : 安装所有模块}';
+    protected $signature = 'xditn:module:module:install {--f : 强制安装} {--all : 安装所有模块}';
 
     protected $description = 'install xditnmodule module';
 

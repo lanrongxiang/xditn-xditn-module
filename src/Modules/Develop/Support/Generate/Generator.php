@@ -19,8 +19,6 @@ use Illuminate\Support\Str;
 use Modules\Develop\Models\SchemaFiles;
 use Modules\Develop\Support\Generate\Create\Controller;
 use Modules\Develop\Support\Generate\Create\Dynamic;
-use Modules\Develop\Support\Generate\Create\FrontForm;
-use Modules\Develop\Support\Generate\Create\FrontTable;
 use Modules\Develop\Support\Generate\Create\Menu;
 use Modules\Develop\Support\Generate\Create\Model;
 use Modules\Develop\Support\Generate\Create\Request;
@@ -78,10 +76,7 @@ class Generator
         try {
             if ($generateFiles) {
                 // 生成文件模式
-                // 前端文件生成
                 $this->files['dynamic_path'] = $this->createDynamic();
-                $this->files['table_path'] = $this->createFrontTable();
-                $this->files['form_path'] = $this->createFrontForm();
 
                 // 后端文件生成（根据 generateBackend 标志决定是否生成）
                 $generateBackend = $this->gen['generateBackend'] ?? false;
@@ -102,8 +97,6 @@ class Generator
             } else {
                 // 不生成文件，只生成内容并保存到数据库
                 $this->files['dynamic_path'] = $this->getDynamicContent();
-                $this->files['table_path'] = $this->getFrontTableContent();
-                $this->files['form_path'] = $this->getFrontFormContent();
 
                 // 后端文件内容生成（根据 generateBackend 标志决定是否生成）
                 $generateBackend = $this->gen['generateBackend'] ?? false;
@@ -154,27 +147,6 @@ class Generator
         return $route->create();
     }
 
-    /**
-     * create font.
-     *
-     * @throws FileNotFoundException
-     */
-    public function createFrontTable(): bool|string|null
-    {
-        $apiString = (new Route($this->gen['controller']))->setModule($this->gen['module'])->getApiRoute();
-        $table = new FrontTable(
-            $this->gen['controller'],
-            $this->gen['paginate'],
-            $apiString,
-            $this->gen['form'],
-            $this->gen['dymaic'],
-            $this->gen['dialogForm'],
-            $this->gen['operations']
-        );
-
-        return $table->setModule($this->gen['module'])->setStructures($this->structures)->create();
-    }
-
     public function createDynamic()
     {
         if ($this->gen['dymaic']) {
@@ -190,30 +162,6 @@ class Generator
 
             return $dynamic->setModule($this->gen['module'])->create();
         }
-    }
-
-    /**
-     * create font.
-     *
-     * @throws FileNotFoundException
-     */
-    public function createFrontForm(): bool|string|null
-    {
-        // 无需创建 form
-        if (!$this->gen['form']) {
-            return false;
-        }
-
-        $apiString = (new Route($this->gen['controller']))->setModule($this->gen['module'])->getApiRoute();
-
-        $form = new FrontForm(
-            $this->gen['controller'],
-            $this->gen['dymaic'],
-            $this->gen['dialogForm'],
-            $apiString
-        );
-
-        return $form->setModule($this->gen['module'])->setStructures($this->structures)->setTableName($this->gen['schema'])->create();
     }
 
     /**
@@ -292,58 +240,6 @@ class Generator
 
         return [
             'path' => $dynamic->getFile(),
-            'content' => $content ?: '',
-        ];
-    }
-
-    /**
-     * 获取前端表格内容（不写入文件）.
-     */
-    protected function getFrontTableContent(): array|false
-    {
-        $apiString = (new Route($this->gen['controller']))->setModule($this->gen['module'])->getApiRoute();
-        $table = new FrontTable(
-            $this->gen['controller'],
-            $this->gen['paginate'],
-            $apiString,
-            $this->gen['form'],
-            $this->gen['dymaic'],
-            $this->gen['dialogForm'],
-            $this->gen['operations']
-        );
-
-        $table->setModule($this->gen['module'])->setStructures($this->structures);
-        $content = $table->getContent();
-
-        return [
-            'path' => $table->getFile(),
-            'content' => $content ?: '',
-        ];
-    }
-
-    /**
-     * 获取前端表单内容（不写入文件）.
-     */
-    protected function getFrontFormContent(): array|false
-    {
-        if (!$this->gen['form']) {
-            return false;
-        }
-
-        $apiString = (new Route($this->gen['controller']))->setModule($this->gen['module'])->getApiRoute();
-
-        $form = new FrontForm(
-            $this->gen['controller'],
-            $this->gen['dymaic'],
-            $this->gen['dialogForm'],
-            $apiString
-        );
-
-        $form->setModule($this->gen['module'])->setStructures($this->structures)->setTableName($this->gen['schema']);
-        $content = $form->getContent();
-
-        return [
-            'path' => $form->getFile(),
             'content' => $content ?: '',
         ];
     }

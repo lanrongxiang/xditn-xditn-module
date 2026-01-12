@@ -19,13 +19,11 @@ return new class() extends Migration {
             $table->text('controller_path')->nullable()->comment('控制器文件路径');
             $table->text('model_path')->nullable()->comment('模型文件路径');
             $table->text('request_path')->nullable()->comment('请求文件路径');
-            $table->text('table_path')->nullable()->comment('vue table 文件路径');
-            $table->text('form_path')->nullable()->comment('vue form 文件路径');
+            $table->text('dynamic_path')->nullable()->comment('动态表单文件路径');
             $table->text('controller_file')->nullable()->comment('控制器文件内容');
             $table->text('model_file')->nullable()->comment('模型文件内容');
             $table->text('request_file')->nullable()->comment('请求文件内容');
-            $table->text('table_file')->nullable()->comment('vue table 文件内容');
-            $table->text('form_file')->nullable()->comment('vue form 文件内容');
+            $table->text('dynamic_file')->nullable()->comment('动态表单文件内容');
             $table->createdAt();
             $table->updatedAt();
             $table->deletedAt();
