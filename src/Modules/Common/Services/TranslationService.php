@@ -17,15 +17,12 @@ class TranslationService
 {
     use Cacheable;
 
-    /**
-     * 缓存前缀.
-     */
-    protected ?string $cachePrefix = 'translation';
-
-    /**
-     * 缓存标签.
-     */
-    protected array $cacheTags = ['translation'];
+    public function __construct()
+    {
+        // 设置缓存配置
+        $this->cachePrefix = 'translation';
+        $this->cacheTags = ['translation'];
+    }
 
     /**
      * 获取基础配置.

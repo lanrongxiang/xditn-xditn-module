@@ -25,20 +25,15 @@ class SystemConfig extends Model
 
     protected $fillable = ['id', 'key', 'value', 'creator_id', 'created_at', 'updated_at', 'deleted_at'];
 
-    /**
-     * 缓存前缀.
-     */
-    protected ?string $cachePrefix = 'system_config';
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
 
-    /**
-     * 缓存标签.
-     */
-    protected array $cacheTags = ['system_config'];
-
-    /**
-     * 缓存时间（永久缓存）.
-     */
-    protected int $cacheTTL = 0;
+        // 设置缓存配置
+        $this->cachePrefix = 'system_config';
+        $this->cacheTags = ['system_config'];
+        $this->cacheTTL = 0; // 永久缓存
+    }
 
     /**
      * 保存配置.
