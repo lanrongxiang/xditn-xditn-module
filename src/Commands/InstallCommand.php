@@ -25,7 +25,7 @@ class InstallCommand extends XditnModuleCommand
 {
     protected bool $isFinished = false;
 
-    protected $signature = 'xditn:module:install {--prod} {--docker} {--fresh : 强制重新安装，删除已有模块记录} {--modules=* : 指定要安装的模块，例如 --modules=Ai --modules=Cms}';
+    protected $signature = 'xditn:module:install {--prod} {--docker} {--fresh : 强制重新安装，删除已有模块记录} {--no-publish : 不发布模块到应用层} {--modules=* : 指定要安装的模块，例如 --modules=Ai --modules=Cms}';
 
     protected $description = 'install xditnmodule';
 
@@ -309,6 +309,11 @@ class InstallCommand extends XditnModuleCommand
                 $this->runArtisanCommand('vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"');
             }
 
+            // 发布模块到应用层（除非指定 --no-publish）
+            if (! $this->option('no-publish')) {
+                $this->publishModulesToApp();
+            }
+
             // 执行迁移
             $this->runArtisanCommand('migrate');
 
@@ -345,6 +350,55 @@ class InstallCommand extends XditnModuleCommand
             $this->error('安装失败: '.$e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * 发布模块到应用层.
+     */
+    protected function publishModulesToApp(): void
+    {
+        $this->info('发布模块到应用层...');
+
+        $sourcePath = XditnModule::packageModulesPath();
+        $targetPath = XditnModule::moduleRootPath();
+
+        if (! File::exists($sourcePath)) {
+            $this->warn('框架模块目录不存在，跳过发布');
+
+            return;
+        }
+
+        // 确保目标目录存在
+        if (! File::exists($targetPath)) {
+            File::makeDirectory($targetPath, 0755, true);
+        }
+
+        $modules = File::directories($sourcePath);
+        $force = $this->option('fresh');
+
+        foreach ($modules as $modulePath) {
+            $moduleName = basename($modulePath);
+            $targetModulePath = $targetPath.$moduleName;
+
+            // 如果目标已存在且不是 fresh 模式，跳过
+            if (File::exists($targetModulePath) && ! $force) {
+                $this->line("  模块 [{$moduleName}] 已存在，跳过");
+
+                continue;
+            }
+
+            // fresh 模式下先删除
+            if (File::exists($targetModulePath) && $force) {
+                File::deleteDirectory($targetModulePath);
+            }
+
+            // 复制模块
+            File::copyDirectory($modulePath, $targetModulePath);
+            $this->info("  ✓ 模块 [{$moduleName}] 已发布");
+        }
+
+        $this->info('模块发布完成');
+        $this->newLine();
     }
 
     /**

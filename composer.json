@@ -40,14 +40,12 @@
             "src/Support/helpers.php"
         ],
         "psr-4": {
-            "XditnModule\\": "src/",
-            "Modules\\": "src/Modules/"
+            "XditnModule\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/",
-            "Modules\\": "src/Modules/"
+            "Tests\\": "tests/"
         }
     },
     "authors": [

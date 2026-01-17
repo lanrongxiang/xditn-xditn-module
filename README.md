@@ -99,12 +99,35 @@ php artisan xditn:module:install --prod
 php artisan xditn:module:install --docker
 ```
 
-**强制重新安装（清除已有模块记录）：**
+**强制重新安装（更新模块代码）：**
 ```bash
 php artisan xditn:module:install --fresh
 ```
 
-> 使用 `--fresh` 参数会删除 `storage/app/modules.json` 文件，重新安装所有模块。
+> 使用 `--fresh` 参数会：
+> 1. 删除 `storage/app/modules.json` 模块记录
+> 2. 重新发布所有模块到 `modules/` 目录（覆盖现有文件）
+> 3. 重新运行迁移和数据填充
+
+**不发布模块（保留 vendor 中的模块）：**
+```bash
+php artisan xditn:module:install --no-publish
+```
+
+### 单独发布模块
+
+如果只想发布或更新某个模块：
+
+```bash
+# 发布所有模块
+php artisan xditn:module:publish --all
+
+# 发布指定模块
+php artisan xditn:module:publish User
+
+# 强制覆盖已存在的模块
+php artisan xditn:module:publish User --force
+```
 
 ### 第七步：启动服务
 
@@ -201,18 +224,21 @@ project/
 │   └── xditn.php              # XditnModule 配置
 ├── database/
 │   └── migrations/            # Laravel 迁移文件
-├── vendor/
-│   └── xditn/xditn-module/
-│       └── src/
-│           └── Modules/       # 框架内置模块
-│               ├── User/      # 用户管理
-│               ├── Permissions/ # 权限管理
-│               ├── System/    # 系统设置
-│               ├── Common/    # 通用功能
-│               ├── Develop/   # 开发工具
-│               └── ...
-└── modules/                   # 用户自定义模块（可选）
+├── modules/                   # 所有模块（安装时自动发布）
+│   ├── User/                  # 用户管理
+│   ├── Permissions/           # 权限管理
+│   ├── System/                # 系统设置
+│   ├── Common/                # 通用功能
+│   ├── Develop/               # 开发工具
+│   └── MyModule/              # 你自己创建的模块
+└── vendor/
+    └── xditn/xditn-module/    # 框架核心代码
 ```
+
+**重要说明**：
+- 安装时框架模块会自动发布到 `modules/` 目录
+- 你可以自由修改 `modules/` 目录下的任何代码
+- 更新框架后，使用 `--fresh` 参数可更新模块代码
 
 ### 模块目录结构
 

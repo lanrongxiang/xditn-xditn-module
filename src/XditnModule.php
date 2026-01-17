@@ -58,22 +58,28 @@ final class XditnModule
 
     /**
      * module dir.
-     * 优先查找包内模块，如果不存在则查找项目目录.
+     * 优先查找应用层模块，如果不存在则查找包内模块.
      */
     public static function getModulePath(string $module, bool $make = true): string
     {
-        // 首先检查包内是否存在该模块
+        // 首先检查应用层是否存在该模块（优先使用应用层）
+        $appModulePath = self::moduleRootPath().ucfirst($module).DIRECTORY_SEPARATOR;
+        if (File::isDirectory($appModulePath)) {
+            return $appModulePath;
+        }
+
+        // 检查包内是否存在该模块
         $packageModulePath = self::packageModulesPath().ucfirst($module).DIRECTORY_SEPARATOR;
         if (File::isDirectory($packageModulePath)) {
             return $packageModulePath;
         }
 
-        // 如果包内不存在，则使用项目目录
+        // 都不存在，则在应用层创建
         if ($make) {
-            return self::makeDir(self::moduleRootPath().ucfirst($module).DIRECTORY_SEPARATOR);
+            return self::makeDir($appModulePath);
         }
 
-        return self::moduleRootPath().ucfirst($module).DIRECTORY_SEPARATOR;
+        return $appModulePath;
     }
 
     /**
@@ -383,30 +389,39 @@ final class XditnModule
 
     /**
      * Get all module service providers.
+     * 应用层模块优先，覆盖包内同名模块.
      */
     public static function getAllProviders(): array
     {
         $providers = [];
+        $loadedModules = [];
 
-        // 包内模块
-        if (File::isDirectory(self::packageModulesPath())) {
-            foreach (File::directories(self::packageModulesPath()) as $dir) {
-                $moduleName = pathinfo($dir, PATHINFO_BASENAME);
-                $provider = self::getModuleServiceProvider($moduleName);
-
-                if (class_exists($provider)) {
-                    $providers[] = $provider;
-                }
-            }
-        }
-
-        // 项目模块
+        // 应用层模块优先加载
         if (File::isDirectory(self::moduleRootPath())) {
             foreach (File::directories(self::moduleRootPath()) as $dir) {
                 $moduleName = pathinfo($dir, PATHINFO_BASENAME);
                 $provider = self::getModuleServiceProvider($moduleName);
 
-                if (class_exists($provider) && !in_array($provider, $providers)) {
+                if (class_exists($provider)) {
+                    $providers[] = $provider;
+                    $loadedModules[] = strtolower($moduleName);
+                }
+            }
+        }
+
+        // 包内模块（排除已在应用层加载的模块）
+        if (File::isDirectory(self::packageModulesPath())) {
+            foreach (File::directories(self::packageModulesPath()) as $dir) {
+                $moduleName = pathinfo($dir, PATHINFO_BASENAME);
+
+                // 如果应用层已有该模块，跳过包内模块
+                if (in_array(strtolower($moduleName), $loadedModules)) {
+                    continue;
+                }
+
+                $provider = self::getModuleServiceProvider($moduleName);
+
+                if (class_exists($provider)) {
                     $providers[] = $provider;
                 }
             }
