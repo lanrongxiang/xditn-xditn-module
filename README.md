@@ -99,6 +99,13 @@ php artisan xditn:module:install --prod
 php artisan xditn:module:install --docker
 ```
 
+**强制重新安装（清除已有模块记录）：**
+```bash
+php artisan xditn:module:install --fresh
+```
+
+> 使用 `--fresh` 参数会删除 `storage/app/modules.json` 文件，重新安装所有模块。
+
 ### 第七步：启动服务
 
 ```bash
@@ -146,6 +153,29 @@ php artisan jwt:secret
 1. 确保数据库连接正确
 2. 确保有足够的数据库权限
 3. 尝试重新运行：`php artisan xditn:module:install`
+
+### Q: 提示 "Module [xxx] has been created"
+
+这表示模块已在 `storage/app/modules.json` 中记录，但可能数据库没有数据。
+
+**解决方案 1：强制重新安装**
+```bash
+php artisan xditn:module:install --fresh
+```
+
+**解决方案 2：手动删除模块记录**
+```bash
+rm -f storage/app/modules.json
+php artisan xditn:module:install
+```
+
+**解决方案 3：仅运行迁移和 seed**
+```bash
+php artisan migrate
+php artisan xditn:module:migrate user
+php artisan xditn:module:db:seed user
+# 依次处理其他模块...
+```
 
 ### Q: 时间显示为 1970-01-01
 

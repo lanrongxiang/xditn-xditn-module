@@ -25,7 +25,7 @@ class InstallCommand extends XditnModuleCommand
 {
     protected bool $isFinished = false;
 
-    protected $signature = 'xditn:module:install {--prod} {--docker} {--modules=* : 指定要安装的模块，例如 --modules=Ai --modules=Cms}';
+    protected $signature = 'xditn:module:install {--prod} {--docker} {--fresh : 强制重新安装，删除已有模块记录} {--modules=* : 指定要安装的模块，例如 --modules=Ai --modules=Cms}';
 
     protected $description = 'install xditnmodule';
 
@@ -288,6 +288,11 @@ class InstallCommand extends XditnModuleCommand
     protected function publishConfig(): void
     {
         try {
+            // 如果是 fresh 模式，先删除模块记录
+            if ($this->option('fresh')) {
+                $this->clearModulesJson();
+            }
+
             // 生成 APP_KEY
             $this->runArtisanCommand('key:generate');
 
@@ -339,6 +344,19 @@ class InstallCommand extends XditnModuleCommand
         } catch (\Exception|\Throwable $e) {
             $this->error('安装失败: '.$e->getMessage());
             throw $e;
+        }
+    }
+
+    /**
+     * 清除模块记录文件.
+     */
+    protected function clearModulesJson(): void
+    {
+        $modulesJson = storage_path('app').DIRECTORY_SEPARATOR.'modules.json';
+
+        if (File::exists($modulesJson)) {
+            File::delete($modulesJson);
+            $this->info('已清除模块记录文件');
         }
     }
 
