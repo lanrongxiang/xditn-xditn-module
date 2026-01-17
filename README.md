@@ -37,8 +37,31 @@ DB_PASSWORD=your_password
 
 ### 第三步：安装 XditnModule
 
+**方式一：使用 Packagist（推荐）**
+
 ```bash
 composer require xditn/xditn-module
+```
+
+**方式二：使用 GitHub VCS（如果 Packagist 未同步最新版本）**
+
+在 `composer.json` 中添加 VCS 仓库：
+
+```json
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/lanrongxiang/xditn-xditn-module.git"
+        }
+    ]
+}
+```
+
+然后安装：
+
+```bash
+composer require xditn/xditn-module --ignore-platform-reqs --no-audit
 ```
 
 ### 第四步：发布配置文件
