@@ -141,7 +141,7 @@ abstract class Export implements FromArray, ShouldAutoSize, WithColumnWidths, Wi
             return $this->path;
         }
 
-        $path = sprintf(config('xditn.module.excel.export_path', 'excel/export').'/%s', date('Ymd'));
+        $path = sprintf(config('xditn.excel.export_path', 'excel/export').'/%s', date('Ymd'));
 
         if (!is_dir($path) && !mkdir($path, 0777, true) && !is_dir($path)) {
             throw new FailedException(sprintf('Directory "%s" was not created', $path));

@@ -24,11 +24,11 @@
         "laravel/sanctum": "^4.0",
         "w7corp/easywechat": "^6.17",
         "nette/php-generator": "^4.1",
-        "intervention/image-laravel": "^1.5"
+        "intervention/image-laravel": "^1.5",
+        "mews/captcha": "^3.4"
     },
     "suggest": {
-        "maatwebsite/excel": "Required for Excel import/export features (^3.1)",
-        "mews/captcha": "Required for captcha features (^3.4 or dev-main for Laravel 12)"
+        "maatwebsite/excel": "Required for Excel import/export features (^3.1)"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0",

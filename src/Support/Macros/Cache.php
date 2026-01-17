@@ -22,7 +22,7 @@ class Cache
     public function adminRemember(): void
     {
         LaravelCache::macro('adminRemember', function (string $key, \Closure|\DateTimeInterface|\DateInterval|int|null $ttl, \Closure $callback) {
-            $key = config('xditn.module.admin_cache_key').$key;
+            $key = config('xditn.admin_cache_key').$key;
 
             return LaravelCache::remember($key, $ttl, $callback);
         });
@@ -31,7 +31,7 @@ class Cache
     public function adminGet(): void
     {
         LaravelCache::macro('adminGet', function (string $key, mixed $default = null) {
-            $key = config('xditn.module.admin_cache_key').$key;
+            $key = config('xditn.admin_cache_key').$key;
 
             return LaravelCache::get($key, $default);
         });
@@ -40,14 +40,14 @@ class Cache
     public function adminForever(): void
     {
         LaravelCache::macro('adminForever', function (string $key, mixed $value) {
-            return LaravelCache::forever(config('xditn.module.admin_cache_key').$key, $value);
+            return LaravelCache::forever(config('xditn.admin_cache_key').$key, $value);
         });
     }
 
     public function adminDelete(): void
     {
         LaravelCache::macro('adminDelete', function (string $key) {
-            return LaravelCache::forget(config('xditn.module.admin_cache_key').$key);
+            return LaravelCache::forget(config('xditn.admin_cache_key').$key);
         });
     }
 }

@@ -34,7 +34,7 @@ abstract class AbstractImage
      */
     protected function isGdDriver(): bool
     {
-        return config('xditn.module.image.driver', 'gd') === 'gd';
+        return config('xditn.image.driver', 'gd') === 'gd';
     }
 
     /**

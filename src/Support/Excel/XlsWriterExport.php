@@ -347,7 +347,7 @@ abstract class XlsWriterExport
             return $this->path;
         }
 
-        $path = sprintf(config('xditn.module.excel.export_path', 'excel/export').'/%s', date('Ymd'));
+        $path = sprintf(config('xditn.excel.export_path', 'excel/export').'/%s', date('Ymd'));
 
         $path = Storage::disk($disk ?: config('filesystems.default'))->path($path);
 

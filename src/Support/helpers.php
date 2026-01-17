@@ -69,7 +69,7 @@ if (!function_exists('withTablePrefix')) {
 if (!function_exists('getGuardName')) {
     function getGuardName(): string
     {
-        return config('xditn.module.auth', 'admin');
+        return config('xditn.auth', 'admin');
     }
 }
 
@@ -126,7 +126,7 @@ if (!function_exists('getAuthUserModel')) {
      */
     function getAuthUserModel(): mixed
     {
-        return config('xditn.module.auth_model');
+        return config('xditn.auth_model');
     }
 }
 
@@ -251,7 +251,7 @@ if (!function_exists('format_response_data')) {
 if (!function_exists('admin_cache')) {
     function admin_cache(string $key, \Closure|\DateTimeInterface|\DateInterval|int|null $ttl, Closure $callback)
     {
-        $cacheKey = config('xditn.module.admin_cache_key').$key;
+        $cacheKey = config('xditn.admin_cache_key').$key;
 
         if ($ttl === null || $ttl === 0) {
             return Cache::forever($cacheKey, $callback());
@@ -267,7 +267,7 @@ if (!function_exists('admin_cache')) {
 if (!function_exists('admin_cache_get')) {
     function admin_cache_get(string $key, mixed $default = null)
     {
-        return Cache::get(config('xditn.module.admin_cache_key').$key, $default);
+        return Cache::get(config('xditn.admin_cache_key').$key, $default);
     }
 }
 
@@ -277,7 +277,7 @@ if (!function_exists('admin_cache_get')) {
 if (!function_exists('admin_cache_has')) {
     function admin_cache_has(string $key): bool
     {
-        return Cache::has(config('xditn.module.admin_cache_key').$key);
+        return Cache::has(config('xditn.admin_cache_key').$key);
     }
 }
 
@@ -287,7 +287,7 @@ if (!function_exists('admin_cache_has')) {
 if (!function_exists('admin_cache_delete')) {
     function admin_cache_delete(string $key): bool
     {
-        return Cache::forget(config('xditn.module.admin_cache_key').$key);
+        return Cache::forget(config('xditn.admin_cache_key').$key);
     }
 }
 

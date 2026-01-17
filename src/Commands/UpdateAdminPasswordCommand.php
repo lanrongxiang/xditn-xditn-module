@@ -15,14 +15,14 @@ class UpdateAdminPasswordCommand extends Command
 
     public function handle(): void
     {
-        $userModel = config('xditn.module.auth_model');
+        $userModel = config('xditn.auth_model');
 
         if (!$userModel) {
             $this->error('请先设置后台用户模型');
         } else {
             $userModel = app($userModel);
 
-            $superAdminId = config('xditn.module.super_admin', 1);
+            $superAdminId = config('xditn.super_admin', 1);
 
             if (!is_array($superAdminId)) {
                 $superAdminId = [$superAdminId];

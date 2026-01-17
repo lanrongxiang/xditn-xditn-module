@@ -43,7 +43,7 @@ trait DateformatTrait
      */
     public function dateFormatCasts(): array
     {
-        $format = config('xditn.module.model.date_format', 'Y-m-d H:i:s');
+        $format = config('xditn.model.date_format', 'Y-m-d H:i:s');
 
         return [
             'created_at' => "datetime:{$format}",

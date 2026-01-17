@@ -60,6 +60,6 @@ trait ReadFrom
             return $this->disk;
         }
 
-        return config('xditn.module.image.read_from', 'uploads');
+        return config('xditn.image.read_from', 'uploads');
     }
 }

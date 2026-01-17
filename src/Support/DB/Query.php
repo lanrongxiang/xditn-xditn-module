@@ -29,7 +29,7 @@ class Query
     public static function log(): void
     {
         if (static::$log) {
-            Log::channel(config('xditn.module.query_log_channel', 'query'))->info(static::$log);
+            Log::channel(config('xditn.query_log_channel', 'query'))->info(static::$log);
 
             static::$log = null;
         }

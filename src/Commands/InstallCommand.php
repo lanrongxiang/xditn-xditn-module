@@ -310,7 +310,7 @@ class InstallCommand extends XditnModuleCommand
             }
 
             // 发布模块到应用层（除非指定 --no-publish）
-            if (! $this->option('no-publish')) {
+            if (!$this->option('no-publish')) {
                 $this->publishModulesToApp();
             }
 
@@ -362,14 +362,14 @@ class InstallCommand extends XditnModuleCommand
         $sourcePath = XditnModule::packageModulesPath();
         $targetPath = XditnModule::moduleRootPath();
 
-        if (! File::exists($sourcePath)) {
+        if (!File::exists($sourcePath)) {
             $this->warn('框架模块目录不存在，跳过发布');
 
             return;
         }
 
         // 确保目标目录存在
-        if (! File::exists($targetPath)) {
+        if (!File::exists($targetPath)) {
             File::makeDirectory($targetPath, 0755, true);
         }
 
@@ -381,7 +381,7 @@ class InstallCommand extends XditnModuleCommand
             $targetModulePath = $targetPath.$moduleName;
 
             // 如果目标已存在且不是 fresh 模式，跳过
-            if (File::exists($targetModulePath) && ! $force) {
+            if (File::exists($targetModulePath) && !$force) {
                 $this->line("  模块 [{$moduleName}] 已存在，跳过");
 
                 continue;

@@ -30,11 +30,11 @@ class PublishModulesCommand extends XditnModuleCommand
 
         // 确保 modules 目录存在
         $targetPath = XditnModule::moduleRootPath();
-        if (! File::exists($targetPath)) {
+        if (!File::exists($targetPath)) {
             File::makeDirectory($targetPath, 0755, true);
         }
 
-        if ($all || ! $module) {
+        if ($all || !$module) {
             return $this->publishAllModules($force);
         }
 
@@ -48,7 +48,7 @@ class PublishModulesCommand extends XditnModuleCommand
     {
         $sourcePath = XditnModule::packageModulesPath();
 
-        if (! File::exists($sourcePath)) {
+        if (!File::exists($sourcePath)) {
             $this->error('框架模块目录不存在: '.$sourcePath);
 
             return self::FAILURE;
@@ -90,7 +90,7 @@ class PublishModulesCommand extends XditnModuleCommand
         $targetPath = XditnModule::moduleRootPath().$moduleName;
 
         // 检查源模块是否存在
-        if (! File::exists($sourcePath)) {
+        if (!File::exists($sourcePath)) {
             $this->warn("模块 [{$moduleName}] 在框架中不存在，跳过");
 
             return self::FAILURE;
@@ -98,7 +98,7 @@ class PublishModulesCommand extends XditnModuleCommand
 
         // 检查目标是否已存在
         if (File::exists($targetPath)) {
-            if (! $force) {
+            if (!$force) {
                 $this->warn("模块 [{$moduleName}] 已存在，使用 --force 覆盖");
 
                 return self::FAILURE;
@@ -114,4 +114,3 @@ class PublishModulesCommand extends XditnModuleCommand
         return self::SUCCESS;
     }
 }
-
