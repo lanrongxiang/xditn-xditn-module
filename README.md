@@ -5,51 +5,183 @@ XditnModule 是一个基于 Laravel 的模块化后台管理框架核心包，�
 ## 环境要求
 
 - PHP 8.2+
-- Laravel 12.0+
+- Laravel 11.0+ / 12.0+
 - MySQL 5.7+ / MariaDB 10.3+
+- Composer 2.0+
+- Git（用于安装命令检测）
 - Redis（可选，用于缓存和队列）
 
-## 安装
+## 完整安装流程
 
-### 1. 通过 Composer 安装
+### 第一步：创建 Laravel 项目（已有项目跳过）
+
+```bash
+composer create-project laravel/laravel my-admin
+cd my-admin
+```
+
+### 第二步：配置数据库
+
+编辑 `.env` 文件，配置数据库连接：
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database_name
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
+
+**确保数据库已创建且可以连接。**
+
+### 第三步：安装 XditnModule
 
 ```bash
 composer require xditn/xditn-module
 ```
 
-### 2. 发布配置文件
+### 第四步：发布配置文件
 
 ```bash
 php artisan vendor:publish --provider="XditnModule\Providers\XditnModuleServiceProvider"
 ```
 
-### 3. 运行系统安装命令
+这会发布以下文件：
+- `config/xditn.php` - 框架配置文件
+
+### 第五步：配置默认模块（可选）
+
+编辑 `config/xditn.php`，配置需要安装的模块：
+
+```php
+'module' => [
+    // 默认安装的模块
+    'default' => [
+        'user',        // 用户模块（必需）
+        'permissions', // 权限模块（必需）
+        'system',      // 系统模块（必需）
+        'common',      // 通用模块（必需）
+        'develop',     // 开发工具
+        // 可选模块
+        // 'ai',
+        // 'cms',
+        // 'mail',
+        // 'member',
+        // 'openapi',
+        // 'pay',
+        // 'wechat',
+        // 'domain',
+    ],
+],
+```
+
+### 第六步：运行安装命令
 
 ```bash
 php artisan xditn:module:install
 ```
 
-**生产环境：**
+安装命令会自动执行：
+1. 生成 APP_KEY（如果没有）
+2. 发布配置文件
+3. 运行数据库迁移
+4. 填充初始数据（管理员账号等）
+5. 安装配置的模块
+
+**生产环境安装：**
 ```bash
 php artisan xditn:module:install --prod
 ```
 
-**Docker 环境：**
+**Docker 环境安装：**
 ```bash
 php artisan xditn:module:install --docker
 ```
 
+### 第七步：启动服务
+
+```bash
+php artisan serve
+```
+
+访问 `http://127.0.0.1:8000`
+
+### 第八步：登录管理后台
+
+- **默认账号**：`admin@xditn.com`
+- **默认密码**：`xditn`
+
+> 首次登录后请立即修改密码！
+
+---
+
+## 安装常见问题
+
+### Q: 提示 "Git 未安装"
+
+确保 Git 已安装并添加到系统 PATH 环境变量。
+
+**Windows**：
+1. 找到 Git 安装目录（通常是 `C:\Program Files\Git\bin`）
+2. 添加到系统环境变量 PATH
+
+**验证**：
+```bash
+git --version
+```
+
+### Q: 提示 "jwt:secret" 命令不存在
+
+这是正常的，如果您没有安装 `tymon/jwt-auth` 包，此命令会被跳过。
+
+如需 JWT 认证：
+```bash
+composer require tymon/jwt-auth
+php artisan jwt:secret
+```
+
+### Q: 模块安装失败
+
+1. 确保数据库连接正确
+2. 确保有足够的数据库权限
+3. 尝试重新运行：`php artisan xditn:module:install`
+
+### Q: 时间显示为 1970-01-01
+
+从模型的 `$fillable` 数组中移除时间戳字段（`created_at`, `updated_at`, `deleted_at`）。
+
+### Q: decimal 字段报错 "Incorrect decimal value"
+
+在模型中设置：
+```php
+protected bool $autoNull2EmptyString = false;
+```
+
+---
+
 ## 目录结构
+
+安装完成后的目录结构：
 
 ```
 project/
-├── modules/                    # 模块目录
-│   ├── User/                   # 用户模块
-│   ├── Permissions/            # 权限模块
-│   └── ...
+├── app/                        # Laravel 应用目录
 ├── config/
-│   └── xditn.php              # 框架配置
-└── ...
+│   └── xditn.php              # XditnModule 配置
+├── database/
+│   └── migrations/            # Laravel 迁移文件
+├── vendor/
+│   └── xditn/xditn-module/
+│       └── src/
+│           └── Modules/       # 框架内置模块
+│               ├── User/      # 用户管理
+│               ├── Permissions/ # 权限管理
+│               ├── System/    # 系统设置
+│               ├── Common/    # 通用功能
+│               ├── Develop/   # 开发工具
+│               └── ...
+└── modules/                   # 用户自定义模块（可选）
 ```
 
 ### 模块目录结构
@@ -72,41 +204,118 @@ modules/{ModuleName}/
 └── Installer.php             # 模块安装器
 ```
 
-## 快速开始
+---
 
-### 创建 CRUD
+## 创建自定义模块
+
+### 1. 初始化模块
 
 ```bash
-# 创建迁移
-php artisan xditn:module:make:migration Pay recharge_activities
-
-# 运行迁移
-php artisan xditn:module:migrate Pay
-
-# 生成 CRUD
-php artisan xditn:module:make:crud Pay RechargeActivity --subgroup=充值管理
+php artisan xditn:module:init MyModule
 ```
 
-### 控制器示例
+这会在 `modules/` 目录下创建模块基础结构。
+
+### 2. 创建数据库迁移
+
+```bash
+php artisan xditn:module:make:migration MyModule my_table
+```
+
+编辑迁移文件后运行：
+
+```bash
+php artisan xditn:module:migrate MyModule
+```
+
+### 3. 生成 CRUD
+
+```bash
+php artisan xditn:module:make:crud MyModule MyResource --subgroup=资源管理
+```
+
+这会生成：
+- 模型
+- 控制器
+- 请求验证类
+- 服务类
+
+### 4. 添加路由
+
+编辑 `modules/MyModule/routes/route.php`：
+
+```php
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Modules\MyModule\Http\Controllers\MyResourceController;
+
+Route::prefix('my-module')->group(function () {
+    Route::apiResource('my-resources', MyResourceController::class);
+});
+```
+
+---
+
+## 常用命令
+
+### 迁移命令
+
+```bash
+php artisan xditn:module:make:migration {模块名} {表名}
+php artisan xditn:module:migrate {模块名}
+php artisan xditn:module:migrate:fresh {模块名}
+php artisan xditn:module:migrate:rollback {模块名}
+```
+
+### 代码生成命令
+
+```bash
+php artisan xditn:module:make:controller {模块名} {控制器名}
+php artisan xditn:module:make:model {模块名} {模型名} --t=表名
+php artisan xditn:module:make:crud {模块名} {资源名} --subgroup=分组名
+php artisan xditn:module:make:seeder {模块名} {Seeder名称}
+php artisan xditn:module:make:observer {模块名} {模型名}
+```
+
+### Seeder 命令
+
+```bash
+php artisan xditn:module:db:seed {模块名}
+php artisan xditn:module:db:seed {模块名} --seeder=MySeeder
+```
+
+### 维护命令
+
+```bash
+php artisan xditn:module:version              # 查看版本
+php artisan xditn:module:update:password      # 更新管理员密码
+php artisan xditn:module:api:doc              # 生成 API 文档
+php artisan xditn:module:purge-trashed        # 清理软删除数据
+```
+
+---
+
+## 控制器示例
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace Modules\Pay\Http\Controllers;
+namespace Modules\MyModule\Http\Controllers;
 
-use Modules\Pay\Models\RechargeActivity;
+use Modules\MyModule\Models\MyResource;
 use XditnModule\Base\XditnModuleController as Controller;
 
 /**
  * @group 管理端
- * @subgroup 充值活动管理
+ * @subgroup 资源管理
  */
-class RechargeActivityController extends Controller
+class MyResourceController extends Controller
 {
     public function __construct(
-        protected readonly RechargeActivity $model
+        protected readonly MyResource $model
     ) {}
 
     public function index(): mixed
@@ -136,69 +345,36 @@ class RechargeActivityController extends Controller
 }
 ```
 
-### 模型示例
+## 模型示例
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace Modules\Pay\Models;
+namespace Modules\MyModule\Models;
 
 use XditnModule\Base\XditnModuleModel;
 
-class RechargeActivity extends XditnModuleModel
+class MyResource extends XditnModuleModel
 {
-    protected $table = 'recharge_activities';
+    protected $table = 'my_resources';
 
-    protected $fillable = ['id', 'title', 'description', 'type', 'status'];
+    // 可批量赋值字段（不包含时间戳）
+    protected $fillable = ['id', 'title', 'description', 'status'];
 
-    protected array $fields = ['id', 'title', 'type', 'status', 'created_at'];
+    // 列表查询返回字段
+    protected array $fields = ['id', 'title', 'status', 'created_at'];
 
+    // 可搜索字段
     public array $searchable = [
         'title' => 'like',
-        'type' => '=',
         'status' => '=',
     ];
 }
 ```
 
-## 常用命令
-
-### 迁移命令
-
-```bash
-php artisan xditn:module:make:migration {模块名} {表名}
-php artisan xditn:module:migrate {模块名}
-php artisan xditn:module:migrate:fresh {模块名}
-php artisan xditn:module:migrate:rollback {模块名}
-```
-
-### 代码生成命令
-
-```bash
-php artisan xditn:module:make:controller {模块名} {控制器名}
-php artisan xditn:module:make:model {模块名} {模型名} --t=表名
-php artisan xditn:module:make:crud {模块名} {资源名} --subgroup=分组名
-php artisan xditn:module:make:observer {模块名} {模型名}
-php artisan xditn:module:make:resource {模块名} {资源名}
-```
-
-### Seeder 命令
-
-```bash
-php artisan xditn:module:make:seeder {模块名} {Seeder名称}
-php artisan xditn:module:db:seed {模块名}
-```
-
-### 维护命令
-
-```bash
-php artisan xditn:module:purge-trashed --days=30   # 清理软删除数据
-php artisan xditn:module:api:doc                    # 生成 API 文档
-php artisan xditn:module:update:password            # 更新管理员密码
-php artisan xditn:module:version                    # 查看版本
-```
+---
 
 ## 核心功能
 
@@ -218,9 +394,16 @@ php artisan xditn:module:version                    # 查看版本
 ### 链式查询
 
 ```php
+// 关联查询
 $this->model->setBeforeGetList(fn($q) => $q->with('user'))->getList();
+
+// 禁用分页
 $this->model->disablePaginate()->getList();
+
+// 树形结构
 $this->model->asTree()->getList();
+
+// 自定义搜索
 $this->model->setSearchable(['title' => 'like'])->getList();
 ```
 
@@ -307,87 +490,7 @@ class Order extends XditnModuleModel
 Order::filter(['status' => 1, 'date_range' => ['2024-01-01', '2024-12-31']])->get();
 ```
 
-### API 版本控制
-
-```php
-use XditnModule\Support\ApiVersion;
-
-// 注册版本化路由
-ApiVersion::routes('v1', function () {
-    Route::get('users', [UserController::class, 'index']);
-});
-
-// 版本判断
-if (ApiVersion::gte('v2')) {
-    // v2+ 逻辑
-}
-```
-
-### 异常类型
-
-| 异常类 | HTTP 状态码 | 说明 |
-|--------|------------|------|
-| `ValidationException` | 422 | 验证失败 |
-| `AuthenticationException` | 401 | 认证失败 |
-| `AuthorizationException` | 403 | 授权失败 |
-| `ResourceNotFoundException` | 404 | 资源不存在 |
-| `BusinessException` | 400 | 业务异常 |
-| `RateLimitException` | 429 | 限流异常 |
-| `ServiceUnavailableException` | 503 | 服务不可用 |
-
-```php
-throw new BusinessException('余额不足', ['required' => 100, 'current' => 50]);
-```
-
-## 中间件
-
-### 速率限制
-
-```php
-Route::middleware(RateLimitMiddleware::class)->group(function () {
-    // 默认每分钟 60 次请求
-});
-```
-
-### 请求追踪
-
-```php
-Route::middleware(RequestTracingMiddleware::class)->group(function () {
-    // 自动添加 X-Trace-Id 响应头
-});
-
-// 获取追踪 ID
-$traceId = request()->attributes->get('trace_id');
-```
-
-### 响应压缩
-
-```php
-Route::middleware(CompressResponseMiddleware::class)->group(function () {
-    // 自动 Gzip 压缩响应
-});
-```
-
-## 健康检查
-
-```php
-Route::get('health', [HealthController::class, 'index']);
-Route::get('health/ready', [HealthController::class, 'ready']);
-Route::get('health/live', [HealthController::class, 'live']);
-```
-
-响应示例：
-```json
-{
-    "status": "healthy",
-    "timestamp": "2024-01-01T00:00:00Z",
-    "checks": {
-        "database": {"status": "ok", "latency_ms": 5.2},
-        "redis": {"status": "ok", "latency_ms": 1.1},
-        "cache": {"status": "ok", "latency_ms": 2.3}
-    }
-}
-```
+---
 
 ## 配置说明
 
@@ -399,9 +502,12 @@ return [
     'request_allowed' => true,             // GET 请求免权限
     
     'module' => [
-        'root' => 'modules',               // 模块目录
+        'root' => 'modules',               // 用户模块目录
         'namespace' => 'Modules',          // 命名空间
         'autoload' => true,                // 自动加载
+        'default' => [                     // 默认安装模块
+            'user', 'permissions', 'system', 'common', 'develop',
+        ],
     ],
     
     'route' => [
@@ -424,44 +530,62 @@ return [
         'auto_purge' => true,
         'purge_after_days' => 30,
     ],
-    
-    'query_log' => [
-        'enabled' => false,
-        'slow_threshold' => 1000,          // 慢查询阈值（毫秒）
-    ],
 ];
 ```
 
-## Octane 支持
+---
 
-在 `config/octane.php` 中配置：
+## 异常类型
+
+| 异常类 | HTTP 状态码 | 说明 |
+|--------|------------|------|
+| `ValidationException` | 422 | 验证失败 |
+| `AuthenticationException` | 401 | 认证失败 |
+| `AuthorizationException` | 403 | 授权失败 |
+| `ResourceNotFoundException` | 404 | 资源不存在 |
+| `BusinessException` | 400 | 业务异常 |
+| `FailedException` | 500 | 操作失败 |
 
 ```php
-return [
-    'listeners' => [
-        RequestReceived::class => [
-            XditnModule\Octane\RegisterExceptionHandler::class
-        ],
-    ],
-];
+use XditnModule\Exceptions\FailedException;
+
+throw new FailedException('操作失败');
 ```
 
-## 常见问题
+---
 
-### 时间显示为 1970-01-01
+## 中间件
 
-从 `$fillable` 中移除时间戳字段（`created_at`, `updated_at`, `deleted_at`）。
+### 速率限制
 
-### decimal 字段报错
-
-在模型中设置：
 ```php
-protected bool $autoNull2EmptyString = false;
+Route::middleware(RateLimitMiddleware::class)->group(function () {
+    // 默认每分钟 60 次请求
+});
 ```
 
-### 模块路由未加载
+### 请求追踪
 
-检查 `config/xditn.php` 中 `module.autoload` 是否为 `true`。
+```php
+Route::middleware(RequestTracingMiddleware::class)->group(function () {
+    // 自动添加 X-Trace-Id 响应头
+});
+```
+
+---
+
+## 更新升级
+
+```bash
+composer update xditn/xditn-module
+```
+
+如需更新配置文件：
+```bash
+php artisan vendor:publish --provider="XditnModule\Providers\XditnModuleServiceProvider" --force
+```
+
+---
 
 ## PR 提交规范
 
@@ -477,6 +601,8 @@ protected bool $autoNull2EmptyString = false;
 | `chore` | 构建工具 |
 
 示例：`fix(Pay): 修复充值金额计算错误`
+
+---
 
 ## 许可证
 
