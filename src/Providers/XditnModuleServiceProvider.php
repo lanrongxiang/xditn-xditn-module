@@ -97,7 +97,12 @@ class XditnModuleServiceProvider extends ServiceProvider
      */
     protected function registerEvents(): void
     {
-        Event::listen(RequestHandled::class, config('xditn.module.response.request_handled_listener'));
+        $listener = config('xditn.module.response.request_handled_listener');
+
+        // 只有配置了监听器才注册
+        if ($listener && class_exists($listener)) {
+            Event::listen(RequestHandled::class, $listener);
+        }
     }
 
     /**
